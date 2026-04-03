@@ -1,13 +1,13 @@
-import { ApplicationConfig, isDevMode, importProvidersFrom } from '@angular/core';
-import { provideServiceWorker } from '@angular/service-worker';
-import { LucideAngularModule, Plus, Trash2, ShieldCheck, WifiOff } from 'lucide-angular';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
+import { LucideAngularModule, Settings, Sandwich, ArrowLeft } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000'
-    }),
-    importProvidersFrom(LucideAngularModule.pick({ Plus, Trash2, ShieldCheck, WifiOff }))
+    provideRouter(routes),
+    importProvidersFrom(
+      LucideAngularModule.pick({ Settings, Sandwich, ArrowLeft })
+    )
   ]
 };
