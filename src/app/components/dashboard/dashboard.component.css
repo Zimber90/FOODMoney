@@ -1,0 +1,131 @@
+.container {
+  padding: 2rem 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #fcfcfc;
+}
+
+header {
+  margin-bottom: 2.5rem;
+}
+
+.status-badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  text-transform: uppercase;
+}
+
+.badge.offline { background: #e0f2fe; color: #0369a1; }
+.badge.private { background: #f0fdf4; color: #15803d; }
+
+h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+header p {
+  color: #666;
+  margin-top: 4px;
+}
+
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 1.5rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  background: #6366f1;
+  color: white;
+  border: none;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fab.active {
+  transform: rotate(45deg);
+  background: #ef4444;
+}
+
+.form-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+input, textarea {
+  border: 1px solid #eee;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, textarea:focus {
+  border-color: #6366f1;
+}
+
+.input-title {
+  font-weight: 700;
+}
+
+.save-btn {
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding-bottom: 100px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 0;
+  color: #999;
+}
+
+@media (min-width: 768px) {
+  .notes-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -1,0 +1,41 @@
+<div class="container">
+  <header>
+    <div class="status-badges">
+      <span class="badge offline">
+        <lucide-icon [name]="offlineIcon" size="14"></lucide-icon>
+        Offline Ready
+      </span>
+      <span class="badge private">
+        <lucide-icon [name]="shieldIcon" size="14"></lucide-icon>
+        Private
+      </span>
+    </div>
+    <h1>Il Mio Spazio</h1>
+    <p>Tutto ciò che scrivi resta solo sul tuo telefono.</p>
+  </header>
+
+  <div class="actions">
+    <button class="fab" (click)="showForm = !showForm" [class.active]="showForm">
+      <lucide-icon [name]="plusIcon" size="24"></lucide-icon>
+    </button>
+  </div>
+
+  @if (showForm) {
+    <div class="form-card">
+      <input [(ngModel)]="newTitle" placeholder="Titolo..." class="input-title">
+      <textarea [(ngModel)]="newContent" placeholder="Scrivi qualcosa..." rows="4"></textarea>
+      <button (click)="addNote()" class="save-btn">Salva Nota</button>
+    </div>
+  }
+
+  <div class="notes-grid">
+    @for (note of notes; track note.id) {
+      <app-note-card [note]="note" (onDelete)="deleteNote($event)"></app-note-card>
+    } @empty {
+      <div class="empty-state">
+        <p>Non hai ancora salvato nulla.</p>
+        <p>Inizia aggiungendo la tua prima nota!</p>
+      </div>
+    }
+  </div>
+</div>
