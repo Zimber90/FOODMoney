@@ -18,7 +18,6 @@ import { ThemeService, ThemeType } from '../../services/theme.service';
       </header>
 
       <div class="settings-list">
-        <!-- Sezione Tema -->
         <div class="menu-group">
           <div class="setting-item" (click)="toggleThemeMenu()">
             <div class="circle blue"></div>
@@ -56,26 +55,27 @@ import { ThemeService, ThemeType } from '../../services/theme.service';
   styles: [`
     .settings-container {
       height: 100vh;
-      background-color: var(--bg-color, #ffffff);
+      background-color: var(--bg-color);
       padding: 20px;
       transition: background-color 0.3s ease;
     }
 
     .settings-header {
-      background-color: #5d7a99;
+      background-color: var(--header-bg);
       border-radius: 50px;
       display: flex;
       align-items: center;
       padding: 10px 20px;
-      color: white;
+      color: var(--header-text);
       margin-bottom: 40px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
     }
 
     .back-btn {
       background: none;
       border: none;
-      color: white;
+      color: inherit;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -99,28 +99,11 @@ import { ThemeService, ThemeType } from '../../services/theme.service';
       padding-left: 10px;
     }
 
-    .menu-group {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .setting-item {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-
-    .setting-item:active {
-      transform: scale(0.98);
-    }
-
     .setting-item span {
       font-size: 1.1rem;
       font-weight: 700;
-      color: var(--text-color, #000);
+      color: var(--text-color);
+      transition: color 0.3s ease;
     }
 
     .circle {
@@ -137,7 +120,7 @@ import { ThemeService, ThemeType } from '../../services/theme.service';
     .theme-dropdown {
       margin-left: 10px;
       margin-right: 10px;
-      border: 3px solid #5d7a99;
+      border: 3px solid var(--border-color);
       border-radius: 15px;
       padding: 15px;
       display: flex;
@@ -146,21 +129,17 @@ import { ThemeService, ThemeType } from '../../services/theme.service';
       animation: slideDown 0.2s ease-out;
     }
 
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     .theme-option {
       font-size: 1rem;
       font-weight: 700;
-      color: #000;
+      color: var(--text-color);
       cursor: pointer;
       padding: 4px 0;
     }
 
-    .theme-option:active {
-      opacity: 0.5;
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   `]
 })
