@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule, ArrowLeft, Menu, X } from 'lucide-angular';
+import { CalendarComponent } from '../../components/calendar/calendar.component';
 
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule, CalendarComponent],
   template: `
     <div class="page-container">
       <!-- Sidebar -->
@@ -41,9 +42,10 @@ import { LucideAngularModule, ArrowLeft, Menu, X } from 'lucide-angular';
         </header>
 
         <div class="content-body">
-          <div class="empty-state">
-            <p>Benvenuto nell'area operativa.</p>
-            <p>Usa il menu a sinistra per navigare.</p>
+          <app-calendar></app-calendar>
+          
+          <div class="quick-actions">
+            <p class="hint">Seleziona un giorno per aggiungere una nota o visualizzare gli eventi.</p>
           </div>
         </div>
       </main>
@@ -146,6 +148,7 @@ import { LucideAngularModule, ArrowLeft, Menu, X } from 'lucide-angular';
       display: flex;
       flex-direction: column;
       padding: 20px;
+      overflow-y: auto;
     }
 
     .styled-header {
@@ -155,8 +158,9 @@ import { LucideAngularModule, ArrowLeft, Menu, X } from 'lucide-angular';
       align-items: center;
       padding: 10px 20px;
       color: var(--header-text);
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      flex-shrink: 0;
     }
 
     .menu-trigger {
@@ -175,20 +179,26 @@ import { LucideAngularModule, ArrowLeft, Menu, X } from 'lucide-angular';
       font-size: 1.4rem;
       font-weight: 800;
       margin: 0;
-      margin-right: 24px; /* Bilancia l'icona del menu a sinistra */
+      margin-right: 24px;
     }
 
     .content-body {
       flex: 1;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    .empty-state {
+    .quick-actions {
       text-align: center;
+      padding: 20px;
+    }
+
+    .hint {
+      font-size: 0.9rem;
       color: var(--text-color);
-      opacity: 0.5;
+      opacity: 0.6;
+      font-weight: 600;
     }
 
     @keyframes fadeIn {
