@@ -29,14 +29,10 @@ import { Note } from '../../models/note.model';
              class="day" 
              [class.today]="isToday(day)"
              [class.selected]="isSelected(day)"
-             (click)="selectDay(day)"
-             [style.borderRadius]="settings.borderRadius">
+             [class.has-note]="hasNote(day)"
+             [style.backgroundColor]="hasNote(day) ? getNoteColor(day) : 'transparent'"
+             (click)="selectDay(day)">
           <span class="day-number">{{ day }}</span>
-          
-          <!-- Indicatore nota (cerchio) -->
-          @if (hasNote(day)) {
-            <div class="note-indicator" [style.backgroundColor]="getNoteColor(day)"></div>
-          }
         </div>
       </div>
       
@@ -86,7 +82,7 @@ import { Note } from '../../models/note.model';
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
+      gap: 8px;
       text-align: center;
     }
 
@@ -102,14 +98,14 @@ import { Note } from '../../models/note.model';
     .day {
       aspect-ratio: 1;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       color: var(--text-color);
       position: relative;
+      border-radius: 50%;
       border: 2px solid transparent;
     }
 
@@ -117,35 +113,42 @@ import { Note } from '../../models/note.model';
       background-color: rgba(0,0,0,0.05);
     }
 
-    .selected {
+    .day.has-note {
+      color: #1a1a1a; /* Testo scuro per contrasto sui colori pastello */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .day.selected {
       border-color: var(--header-bg);
+      transform: scale(1.1);
     }
 
-    .today .day-number {
+    .day.today:not(.has-note) {
       color: var(--header-bg);
-      font-weight: 800;
       text-decoration: underline;
+      font-weight: 900;
     }
 
-    .note-indicator {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      position: absolute;
-      bottom: 4px;
+    .day.today.has-note {
+      border: 2px solid var(--header-bg);
+    }
+
+    .day-number {
+      z-index: 2;
     }
 
     .reset-filter {
       width: 100%;
       margin-top: 15px;
-      padding: 8px;
-      background: none;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      color: var(--text-color);
-      font-size: 0.8rem;
+      padding: 10px;
+      background: var(--header-bg);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
     /* Font Sizes */
@@ -239,7 +242,7 @@ export class CalendarComponent implements OnInit {
   getNoteColor(day: number): string {
     const dateStr = this.getDateString(day);
     const note = this.notes.find(n => n.visitDate === dateStr);
-    return note ? note.color : '#5d7a99';
+    return note ? note.color : 'transparent';
   }
 
   selectDay(day: number) {
