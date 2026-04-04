@@ -1,7 +1,8 @@
 export interface Note {
   id: string;
-  title: string;
-  content: string;
-  date: number;
+  restaurantName: string;
+  visitDate: string;
+  amount: string;
+  timestamp: number;
   color: string;
 }

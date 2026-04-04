@@ -30,7 +30,7 @@ import { Note } from '../../models/note.model';
         </nav>
       </aside>
 
-      <!-- Overlay -->
+      <!-- Overlay Sidebar -->
       @if (isSidebarOpen) {
         <div class="overlay" (click)="toggleSidebar()"></div>
       }
@@ -50,22 +50,10 @@ import { Note } from '../../models/note.model';
           </section>
           
           <section class="notes-section">
-            <div class="section-header">
-              <button class="add-btn" (click)="showForm = !showForm" [class.active]="showForm">
-                <lucide-icon [name]="plusIcon" size="20"></lucide-icon>
-                {{ showForm ? 'Chiudi' : 'Aggiungi Nota' }}
-              </button>
-            </div>
-
-            @if (showForm) {
-              <div class="note-form card-animation">
-                <input [(ngModel)]="newTitle" placeholder="Titolo della nota..." class="form-input title-input">
-                <textarea [(ngModel)]="newContent" placeholder="Scrivi qui i tuoi pensieri..." rows="3" class="form-input"></textarea>
-                <button class="save-btn" (click)="addNote()" [disabled]="!newTitle || !newContent">
-                  Salva Nota
-                </button>
-              </div>
-            }
+            <button class="add-btn" (click)="showForm = true">
+              <lucide-icon [name]="plusIcon" size="20"></lucide-icon>
+              Aggiungi Nota
+            </button>
 
             <div class="notes-grid">
               @for (note of notes; track note.id) {
@@ -80,6 +68,38 @@ import { Note } from '../../models/note.model';
           </section>
         </div>
       </main>
+
+      <!-- Pop-up Modal -->
+      @if (showForm) {
+        <div class="modal-overlay" (click)="closeForm()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="blue-container">
+              <div class="input-wrapper">
+                <input [(ngModel)]="restaurantName" placeholder="NOME RISTORANTE" class="styled-input bold">
+              </div>
+              
+              <div class="input-wrapper">
+                <div class="label-input">
+                  <span class="label">Data:</span>
+                  <input [(ngModel)]="visitDate" type="text" class="styled-input">
+                </div>
+              </div>
+
+              <div class="input-wrapper">
+                <div class="label-input">
+                  <span class="label">€</span>
+                  <input [(ngModel)]="amount" type="text" class="styled-input">
+                </div>
+              </div>
+            </div>
+            
+            <div class="modal-actions">
+              <button class="cancel-btn" (click)="closeForm()">Annulla</button>
+              <button class="save-btn" (click)="addNote()" [disabled]="!restaurantName">Salva</button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -90,7 +110,7 @@ import { Note } from '../../models/note.model';
       background-color: var(--bg-color);
     }
 
-    /* Sidebar Styles */
+    /* Sidebar & Header Styles */
     .sidebar {
       position: fixed;
       top: 0;
@@ -105,249 +125,124 @@ import { Note } from '../../models/note.model';
       flex-direction: column;
       box-shadow: 4px 0 15px rgba(0,0,0,0.1);
     }
+    .sidebar.open { left: 0; }
+    .sidebar-header { padding: 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-header h2 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+    .close-btn { background: none; border: none; color: white; cursor: pointer; padding: 5px; }
+    .sidebar-nav { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+    .nav-link { padding: 12px 15px; border-radius: 12px; color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 600; transition: all 0.2s; cursor: pointer; }
+    .nav-link:hover { background-color: rgba(255,255,255,0.15); color: white; }
+    .divider { height: 1px; background-color: rgba(255,255,255,0.1); margin: 10px 0; }
 
-    .sidebar.open {
-      left: 0;
-    }
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 999; }
 
-    .sidebar-header {
-      padding: 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
+    .main-content { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+    .styled-header { background-color: var(--header-bg); border-radius: 50px; display: flex; align-items: center; padding: 10px 20px; color: var(--header-text); margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-shrink: 0; }
+    .menu-trigger { background: none; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; padding: 0; }
+    .title { flex: 1; text-align: center; font-size: 1.4rem; font-weight: 800; margin: 0; margin-right: 24px; }
 
-    .sidebar-header h2 {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 800;
-    }
+    .content-body { display: flex; flex-direction: column; gap: 30px; padding-bottom: 40px; }
 
-    .close-btn {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      padding: 5px;
-    }
+    .add-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background-color: var(--header-bg); color: white; border: none; padding: 14px; border-radius: 16px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
 
-    .sidebar-nav {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .nav-link {
-      padding: 12px 15px;
-      border-radius: 12px;
-      color: rgba(255,255,255,0.8);
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-
-    .nav-link:hover {
-      background-color: rgba(255,255,255,0.15);
-      color: white;
-    }
-
-    .divider {
-      height: 1px;
-      background-color: rgba(255,255,255,0.1);
-      margin: 10px 0;
-    }
-
-    /* Overlay */
-    .overlay {
+    /* Modal Styles */
+    .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0,0,0,0.4);
-      backdrop-filter: blur(2px);
-      z-index: 999;
-      animation: fadeIn 0.3s ease;
-    }
-
-    /* Main Content Styles */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    .styled-header {
-      background-color: var(--header-bg);
-      border-radius: 50px;
-      display: flex;
-      align-items: center;
-      padding: 10px 20px;
-      color: var(--header-text);
-      margin-bottom: 30px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      flex-shrink: 0;
-    }
-
-    .menu-trigger {
-      background: none;
-      border: none;
-      color: inherit;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      padding: 0;
-    }
-
-    .title {
-      flex: 1;
-      text-align: center;
-      font-size: 1.4rem;
-      font-weight: 800;
-      margin: 0;
-      margin-right: 24px;
-    }
-
-    .content-body {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-      padding-bottom: 40px;
-    }
-
-    /* Notes Section Styles */
-    .notes-section {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .section-header {
-      display: flex;
-      width: 100%;
-    }
-
-    .add-btn {
+      background: rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      background-color: var(--header-bg);
-      color: white;
-      border: none;
-      padding: 14px;
-      border-radius: 16px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      width: 100%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-
-    .add-btn.active {
-      background-color: #ef4444;
-    }
-
-    .note-form {
-      background: var(--card-bg);
+      z-index: 2000;
       padding: 20px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px var(--card-shadow);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 30px;
+      padding: 25px;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .blue-container {
+      border: 4px solid #5d7a99;
+      border-radius: 30px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      border: 1px solid rgba(128, 128, 128, 0.1);
-      transition: background-color 0.3s ease;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid rgba(128, 128, 128, 0.2);
-      background: transparent;
-      color: var(--text-color);
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-input:focus {
-      border-color: var(--header-bg);
-    }
-
-    .title-input {
-      font-weight: 700;
-    }
-
-    .save-btn {
-      background-color: var(--text-color);
-      color: var(--bg-color);
-      border: none;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .save-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .notes-grid {
-      display: grid;
-      grid-template-columns: 1fr;
       gap: 15px;
     }
 
-    .empty-notes {
+    .input-wrapper {
+      width: 100%;
+    }
+
+    .styled-input {
+      width: 100%;
+      border: 3px solid #5d7a99;
+      border-radius: 25px;
+      padding: 12px 20px;
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      color: #333;
+    }
+
+    .styled-input.bold {
+      font-weight: 800;
       text-align: center;
-      padding: 40px 20px;
-      background: rgba(128, 128, 128, 0.05);
-      border-radius: 20px;
-      border: 2px dashed rgba(128, 128, 128, 0.1);
     }
 
-    .empty-notes p {
-      margin: 0;
+    .label-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .label {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #000;
+      min-width: 40px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 15px;
       font-weight: 700;
-      color: var(--text-color);
-      opacity: 0.6;
+      cursor: pointer;
+      border: none;
     }
 
-    .empty-notes .sub {
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-top: 5px;
-    }
+    .cancel-btn { background: #eee; color: #666; }
+    .save-btn { background: #5d7a99; color: white; }
+    .save-btn:disabled { opacity: 0.5; }
 
-    .card-animation {
-      animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
+    .notes-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+    .empty-notes { text-align: center; padding: 40px 20px; background: rgba(0,0,0,0.02); border-radius: 20px; border: 2px dashed rgba(0,0,0,0.05); }
+    .empty-notes p { margin: 0; font-weight: 700; color: var(--text-color); opacity: 0.6; }
+    .empty-notes .sub { font-size: 0.85rem; font-weight: 600; margin-top: 5px; }
 
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     @media (min-width: 768px) {
-      .notes-grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      .notes-grid { grid-template-columns: 1fr 1fr; }
     }
   `]
 })
@@ -363,8 +258,10 @@ export class MainComponent implements OnInit {
   showForm = false;
   notes: Note[] = [];
   
-  newTitle = '';
-  newContent = '';
+  restaurantName = '';
+  visitDate = '';
+  amount = '';
+  
   colors = ['#FFD1DC', '#D1EAFF', '#D1FFD7', '#FFF4D1', '#E8D1FF'];
 
   ngOnInit() {
@@ -375,23 +272,28 @@ export class MainComponent implements OnInit {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
 
+  closeForm() {
+    this.showForm = false;
+    this.restaurantName = '';
+    this.visitDate = '';
+    this.amount = '';
+  }
+
   addNote() {
-    if (!this.newTitle.trim() || !this.newContent.trim()) return;
+    if (!this.restaurantName.trim()) return;
 
     const newNote: Note = {
       id: Date.now().toString(),
-      title: this.newTitle,
-      content: this.newContent,
-      date: Date.now(),
+      restaurantName: this.restaurantName,
+      visitDate: this.visitDate || new Date().toLocaleDateString(),
+      amount: this.amount || '0',
+      timestamp: Date.now(),
       color: this.colors[Math.floor(Math.random() * this.colors.length)]
     };
 
     this.notes = [newNote, ...this.notes];
     this.storage.saveNotes(this.notes);
-    
-    this.newTitle = '';
-    this.newContent = '';
-    this.showForm = false;
+    this.closeForm();
   }
 
   deleteNote(id: string) {
