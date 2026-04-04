@@ -254,20 +254,23 @@ import { Note } from '../../models/note.model';
     }
 
     .note-form {
-      background: white;
+      background: var(--card-bg);
       padding: 20px;
       border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      box-shadow: 0 10px 25px var(--card-shadow);
       display: flex;
       flex-direction: column;
       gap: 12px;
-      border: 1px solid rgba(0,0,0,0.05);
+      border: 1px solid rgba(128, 128, 128, 0.1);
+      transition: background-color 0.3s ease;
     }
 
     .form-input {
       width: 100%;
       padding: 12px;
-      border: 1px solid #eee;
+      border: 1px solid rgba(128, 128, 128, 0.2);
+      background: transparent;
+      color: var(--text-color);
       border-radius: 12px;
       font-family: inherit;
       font-size: 0.95rem;
@@ -285,7 +288,7 @@ import { Note } from '../../models/note.model';
 
     .save-btn {
       background-color: var(--text-color);
-      color: white;
+      color: var(--bg-color);
       border: none;
       padding: 12px;
       border-radius: 12px;
@@ -308,9 +311,9 @@ import { Note } from '../../models/note.model';
     .empty-notes {
       text-align: center;
       padding: 40px 20px;
-      background: rgba(0,0,0,0.02);
+      background: rgba(128, 128, 128, 0.05);
       border-radius: 20px;
-      border: 2px dashed rgba(0,0,0,0.05);
+      border: 2px dashed rgba(128, 128, 128, 0.1);
     }
 
     .empty-notes p {

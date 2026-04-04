@@ -29,7 +29,7 @@ import { LucideAngularModule, ChevronLeft, ChevronRight } from 'lucide-angular';
              [class.today]="isToday(day)"
              [style.borderRadius]="settings.borderRadius"
              [style.backgroundColor]="isToday(day) ? settings.highlightColor : 'transparent'"
-             [style.color]="isToday(day) ? '#fff' : 'inherit'">
+             [style.color]="isToday(day) ? '#fff' : 'var(--text-color)'">
           {{ day }}
         </div>
       </div>
@@ -37,13 +37,14 @@ import { LucideAngularModule, ChevronLeft, ChevronRight } from 'lucide-angular';
   `,
   styles: [`
     .calendar-card {
-      background: white;
+      background: var(--card-bg);
       padding: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 10px 30px var(--card-shadow);
+      border: 1px solid rgba(128, 128, 128, 0.1);
       width: 100%;
       max-width: 400px;
       margin: 0 auto;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .calendar-header {
@@ -85,6 +86,7 @@ import { LucideAngularModule, ChevronLeft, ChevronRight } from 'lucide-angular';
       opacity: 0.4;
       padding-bottom: 10px;
       text-transform: uppercase;
+      color: var(--text-color);
     }
 
     .day {
@@ -141,7 +143,6 @@ export class CalendarComponent implements OnInit {
     const month = this.currentDate.getMonth();
     
     const firstDay = new Date(year, month, 1).getDay();
-    // Adjust for Monday start (0 is Sunday in JS)
     const offset = firstDay === 0 ? 6 : firstDay - 1;
     
     this.emptyDays = Array(offset).fill(0);
