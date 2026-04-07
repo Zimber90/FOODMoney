@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, ArrowLeft, Menu, X, Plus } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, Menu, X, Plus, Pencil } from 'lucide-angular';
 import { CalendarComponent } from '../../components/calendar/calendar.component';
 import { NoteCardComponent } from '../../components/note-card/note-card.component';
 import { StorageService } from '../../services/storage.service';
@@ -57,7 +57,11 @@ import { Note } from '../../models/note.model';
 
             <div class="notes-grid">
               @for (note of notes; track note.id) {
-                <app-note-card [note]="note" (onDelete)="deleteNote($event)"></app-note-card>
+                <app-note-card 
+                  [note]="note" 
+                  (onDelete)="deleteNote($event)"
+                  (onEdit)="openForm($event)">
+                </app-note-card>
               } @empty {
                 <div class="empty-notes">
                   <p>Non ci sono note per oggi.</p>
@@ -74,6 +78,8 @@ import { Note } from '../../models/note.model';
         <div class="modal-overlay" (click)="closeForm()">
           <div class="modal-content" (click)="$event.stopPropagation()">
             <div class="blue-container">
+              <h2 class="modal-title">{{ editingNoteId ? 'MODIFICA NOTA' : 'NUOVA NOTA' }}</h2>
+              
               <div class="input-wrapper">
                 <input [(ngModel)]="restaurantName" placeholder="NOME RISTORANTE" class="styled-input bold">
               </div>
@@ -108,7 +114,9 @@ import { Note } from '../../models/note.model';
             
             <div class="modal-actions">
               <button class="cancel-btn" (click)="closeForm()">Annulla</button>
-              <button class="save-btn" (click)="addNote()" [disabled]="!restaurantName">Salva</button>
+              <button class="save-btn" (click)="saveNote()" [disabled]="!restaurantName">
+                {{ editingNoteId ? 'Aggiorna' : 'Salva' }}
+              </button>
             </div>
           </div>
         </div>
@@ -181,6 +189,14 @@ import { Note } from '../../models/note.model';
       border-radius: 30px;
       padding: 25px;
       animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-title {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #5d7a99;
+      margin-bottom: 15px;
     }
 
     .blue-container {
@@ -293,6 +309,7 @@ export class MainComponent implements OnInit {
   showForm = false;
   notes: Note[] = [];
   
+  editingNoteId: string | null = null;
   restaurantName = '';
   visitDate = '';
   amount = '';
@@ -308,32 +325,56 @@ export class MainComponent implements OnInit {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
 
-  openForm() {
+  openForm(note?: Note) {
     this.showForm = true;
-    this.visitDate = new Date().toISOString().split('T')[0];
-    this.selectedColor = this.colors[0];
+    if (note) {
+      this.editingNoteId = note.id;
+      this.restaurantName = note.restaurantName;
+      this.visitDate = note.visitDate;
+      this.amount = note.amount;
+      this.selectedColor = note.color;
+    } else {
+      this.editingNoteId = null;
+      this.restaurantName = '';
+      this.visitDate = new Date().toISOString().split('T')[0];
+      this.amount = '';
+      this.selectedColor = this.colors[0];
+    }
   }
 
   closeForm() {
     this.showForm = false;
+    this.editingNoteId = null;
     this.restaurantName = '';
     this.visitDate = '';
     this.amount = '';
   }
 
-  addNote() {
+  saveNote() {
     if (!this.restaurantName.trim()) return;
 
-    const newNote: Note = {
-      id: Date.now().toString(),
-      restaurantName: this.restaurantName,
-      visitDate: this.visitDate,
-      amount: this.amount || '0',
-      timestamp: Date.now(),
-      color: this.selectedColor
-    };
+    if (this.editingNoteId) {
+      // Aggiorna nota esistente
+      this.notes = this.notes.map(n => n.id === this.editingNoteId ? {
+        ...n,
+        restaurantName: this.restaurantName,
+        visitDate: this.visitDate,
+        amount: this.amount || '0',
+        color: this.selectedColor
+      } : n);
+    } else {
+      // Crea nuova nota
+      const newNote: Note = {
+        id: Date.now().toString(),
+        restaurantName: this.restaurantName,
+        visitDate: this.visitDate,
+        amount: this.amount || '0',
+        timestamp: Date.now(),
+        color: this.selectedColor
+      };
+      this.notes = [newNote, ...this.notes];
+    }
 
-    this.notes = [newNote, ...this.notes];
     this.storage.saveNotes(this.notes);
     this.closeForm();
   }
