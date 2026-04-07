@@ -25,6 +25,7 @@ import { Note } from '../../models/note.model';
         <nav class="sidebar-nav">
           <a class="nav-link" routerLink="/settings" (click)="toggleSidebar()">Impostazioni</a>
           <a class="nav-link" routerLink="/history" (click)="toggleSidebar()">Storico</a>
+          <a class="nav-link" routerLink="/statistics" (click)="toggleSidebar()">Statistiche</a>
           <div class="divider"></div>
           <a class="nav-link" routerLink="/" (click)="toggleSidebar()">Torna alla Home</a>
         </nav>
