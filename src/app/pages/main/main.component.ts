@@ -91,6 +91,19 @@ import { Note } from '../../models/note.model';
                   <input [(ngModel)]="amount" type="number" placeholder="0.00" class="styled-input">
                 </div>
               </div>
+
+              <div class="input-wrapper">
+                <div class="color-selector">
+                  @for (color of colors; track color) {
+                    <div 
+                      class="color-circle" 
+                      [style.backgroundColor]="color"
+                      [class.active]="selectedColor === color"
+                      (click)="selectedColor = color">
+                    </div>
+                  }
+                </div>
+              </div>
             </div>
             
             <div class="modal-actions">
@@ -213,6 +226,27 @@ import { Note } from '../../models/note.model';
       min-width: 40px;
     }
 
+    .color-selector {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 5px;
+    }
+
+    .color-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .color-circle.active {
+      border-color: #5d7a99;
+      transform: scale(1.2);
+    }
+
     .modal-actions {
       display: flex;
       gap: 10px;
@@ -262,8 +296,9 @@ export class MainComponent implements OnInit {
   restaurantName = '';
   visitDate = '';
   amount = '';
+  selectedColor = '#FFD1DC';
   
-  colors = ['#FFD1DC', '#D1EAFF', '#D1FFD7', '#FFF4D1', '#E8D1FF'];
+  colors = ['#FFD1DC', '#D1EAFF', '#D1FFD7', '#FFF4D1', '#E8D1FF', '#FFD1D1', '#E2E2E2'];
 
   ngOnInit() {
     this.notes = this.storage.getNotes();
@@ -276,6 +311,7 @@ export class MainComponent implements OnInit {
   openForm() {
     this.showForm = true;
     this.visitDate = new Date().toISOString().split('T')[0];
+    this.selectedColor = this.colors[0];
   }
 
   closeForm() {
@@ -294,7 +330,7 @@ export class MainComponent implements OnInit {
       visitDate: this.visitDate,
       amount: this.amount || '0',
       timestamp: Date.now(),
-      color: this.colors[Math.floor(Math.random() * this.colors.length)]
+      color: this.selectedColor
     };
 
     this.notes = [newNote, ...this.notes];
