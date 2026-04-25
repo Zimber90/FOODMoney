@@ -1,19 +1,19 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Aggiunto FormsModule per ngModel
+import { FormsModule } from '@angular/forms';
 import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } from 'date-fns';
 import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Aggiunto FormsModule
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="history-page">
       <h1 class="title">Storico</h1>
       
       <div class="search-container">
-        <input type="text" placeholder="Cerca..." (input)="onSearch((<HTMLInputElement>$event.target).value)">
+        <input type="text" placeholder="Cerca..." (input)="onSearch($event)">
       </div>
       
       <div class="filters">
@@ -143,7 +143,9 @@ export class HistoryComponent {
     });
   }
 
-  onSearch(query: string) {
+  onSearch(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const query = input.value;
     this.filteredOrders = this.orders.filter(order => 
       order.ristorante.toLowerCase().includes(query.toLowerCase()) ||
       order.date.toLowerCase().includes(query.toLowerCase())
