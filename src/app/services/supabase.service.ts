@@ -61,7 +61,7 @@ export class SupabaseService {
         description, 
         category,
         user_id: user.id,
-        expense_date: expenseDate || null
+        created_at: expenseDate || null // Cambiato da 'expense_date' a 'created_at'
       }])
       .select();
     
