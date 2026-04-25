@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } from 'date-fns';
@@ -10,28 +10,26 @@ import { SupabaseService } from '../../services/supabase.service';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="calendar-page">
-      <!-- Barra di navigazione mesi -->
       <div class="calendar-nav">
         <button (click)="prevMonth()" class="nav-btn">◀</button>
         <div class="calendar-title">{{ currentMonth }} {{ currentYear }}</div>
         <button (click)="nextMonth()" class="nav-btn">▶</button>
       </div>
 
-      <!-- Calendario interattivo -->
       <div class="calendar-container">
         <div class="calendar-grid">
-          <!-- Intestazione giorni settimana -->
           <div class="weekdays-row">
             <div *ngFor="let day of weekdays" class="weekday-cell">{{ day }}</div>
           </div>
 
-          <!-- Griglia giorni -->
           <div *ngFor="let week of calendarWeeks" class="week-row">
             <div 
               *ngFor="let day of week" 
               class="day-cell" 
               [class.today]="isToday(day.date)"
               [class.other-month]="isOtherMonth(day.date)"
+              [style.background-color]="getDayColor(day.date)"
+              [style.color]="getDayTextColor(day.date)"
             >
               {{ day.date | date:'d' }}
             </div>
@@ -39,12 +37,10 @@ import { SupabaseService } from '../../services/supabase.service';
         </div>
       </div>
 
-      <!-- FAB per creare ordini -->
       <button class="fab" (click)="openOrderPopup()">
         <span class="fab-icon">+</span>
       </button>
 
-      <!-- Popup creazione ordine -->
       <div *ngIf="isOrderPopupOpen" class="popup-overlay" (click)="closeOrderPopup()">
         <div class="popup-modal" (click)="$event.stopPropagation()">
           <h2 class="popup-title">Crea Ordine</h2>
@@ -88,6 +84,18 @@ import { SupabaseService } from '../../services/supabase.service';
                 class="form-input"
                 placeholder="0.00"
               >
+            </div>
+
+            <div class="form-group">
+              <label for="colore">Colore Ristorante</label>
+              <input 
+                type="color" 
+                id="colore" 
+                name="colore" 
+                [(ngModel)]="orderForm.colore" 
+                class="form-input color-picker"
+              >
+              <small class="color-hint">Scegli un colore per riconoscere il ristorante in calendario</small>
             </div>
             
             <div class="popup-actions">
@@ -183,6 +191,7 @@ import { SupabaseService } from '../../services/supabase.service';
       color: #333;
       cursor: pointer;
       transition: all 0.2s;
+      position: relative;
     }
 
     .day-cell:hover:not(.other-month) {
@@ -199,9 +208,9 @@ import { SupabaseService } from '../../services/supabase.service';
     .day-cell.other-month {
       color: #ccc;
       cursor: default;
+      background-color: transparent !important;
     }
 
-    /* FAB Styles */
     .fab {
       position: fixed;
       bottom: 100px;
@@ -231,7 +240,6 @@ import { SupabaseService } from '../../services/supabase.service';
       font-weight: 700;
     }
 
-    /* Popup Styles */
     .popup-overlay {
       position: fixed;
       top: 0;
@@ -291,6 +299,21 @@ import { SupabaseService } from '../../services/supabase.service';
       border-color: #f97316;
       background: white;
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    .color-picker {
+      height: 50px;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    .color-hint {
+      display: block;
+      font-size: 0.7rem;
+      color: #9a3412;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+      margin-left: 0.5rem;
     }
 
     .popup-actions {
@@ -356,7 +379,7 @@ import { SupabaseService } from '../../services/supabase.service';
     }
   `]
 })
-export class CalendarComponent {
+export class CalendarComponent implements OnInit {
   private supabase = inject(SupabaseService);
   currentDate = new Date();
   currentMonth: string = '';
@@ -364,14 +387,21 @@ export class CalendarComponent {
   weekdays = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
   calendarWeeks: { date: Date }[][] = [];
   isOrderPopupOpen = false;
-  orderForm = {
-    ristorante: '',
-    data: '',
-    importo: 0
-  };
+  orderForm = { ristorante: '', data: '', importo: 0, colore: '#f97316' };
+  orders: any[] = [];
 
-  constructor() {
+  ngOnInit() {
+    this.loadOrders();
     this.generateCalendar();
+  }
+
+  async loadOrders() {
+    try {
+      const { data } = await this.supabase.getExpenses();
+      this.orders = data || [];
+    } catch (error) {
+      console.error('Errore caricamento ordini:', error);
+    }
   }
 
   generateCalendar() {
@@ -426,17 +456,38 @@ export class CalendarComponent {
     return getMonth(date) !== getMonth(this.currentDate) || getYear(date) !== getYear(this.currentDate);
   }
 
+  getDayColor(date: Date): string {
+    if (this.isOtherMonth(date)) return 'transparent';
+    
+    const order = this.orders.find(o => {
+      const orderDate = new Date(o.created_at);
+      return orderDate.toDateString() === date.toDateString();
+    });
+    
+    return order?.restaurant_color || 'transparent';
+  }
+
+  getDayTextColor(date: Date): string {
+    const bgColor = this.getDayColor(date);
+    if (bgColor === 'transparent' || bgColor === '#FFFFFF' || bgColor === '#ffffff') {
+      return '#333';
+    }
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#333' : '#FFFFFF';
+  }
+
   openOrderPopup() {
     this.isOrderPopupOpen = true;
+    this.orderForm = { ristorante: '', data: new Date().toISOString().split('T')[0], importo: 0, colore: '#f97316' };
   }
 
   closeOrderPopup() {
     this.isOrderPopupOpen = false;
-    this.resetOrderForm();
-  }
-
-  resetOrderForm() {
-    this.orderForm = { ristorante: '', data: '', importo: 0 };
+    this.orderForm = { ristorante: '', data: '', importo: 0, colore: '#f97316' };
   }
 
   async saveOrder() {
@@ -446,10 +497,11 @@ export class CalendarComponent {
 
     try {
       const { error } = await this.supabase.addExpense(
-        this.orderForm.importo,
+        parseFloat(this.orderForm.importo.toString()),
         this.orderForm.ristorante,
         'Ristorante',
-        this.orderForm.data
+        this.orderForm.data,
+        this.orderForm.colore
       );
 
       if (error) {
@@ -458,6 +510,7 @@ export class CalendarComponent {
       }
 
       this.closeOrderPopup();
+      this.loadOrders();
     } catch (error) {
       console.error('Errore nel salvataggio ordine:', error);
     }

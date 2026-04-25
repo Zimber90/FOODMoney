@@ -69,6 +69,18 @@ import { SupabaseService } from '../../services/supabase.service';
               placeholder="0.00"
             >
           </div>
+
+          <div class="form-group">
+            <label for="colore">Colore Ristorante</label>
+            <input 
+              type="color" 
+              id="colore" 
+              name="colore" 
+              [(ngModel)]="orderForm.colore" 
+              class="form-input color-picker"
+            >
+            <small class="color-hint">Scegli un colore per riconoscere il ristorante in calendario</small>
+          </div>
           
           <div class="popup-actions">
             <button type="button" class="btn-close" (click)="closeOrderPopup()">Chiudi</button>
@@ -81,10 +93,12 @@ import { SupabaseService } from '../../services/supabase.service';
   styles: [`
     .sandwich-container {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 2rem;
       min-height: calc(100vh - 80px);
+      background: #fff7ed;
     }
     .sandwich-icon {
       width: 300px;
@@ -95,8 +109,10 @@ import { SupabaseService } from '../../services/supabase.service';
     }
     .sandwich-icon:hover { transform: scale(1.05); }
 
+    h1 { color: #9a3412; font-size: 2.5rem; font-weight: 800; margin: 1rem 0 0.5rem; }
+    p { color: #9a3412; opacity: 0.6; margin-bottom: 2rem; font-size: 1rem; }
+
     .create-btn {
-      margin-top: 2rem;
       padding: 1rem 2rem;
       background: #f97316;
       color: white;
@@ -171,6 +187,21 @@ import { SupabaseService } from '../../services/supabase.service';
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
 
+    .color-picker {
+      height: 50px;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    .color-hint {
+      display: block;
+      font-size: 0.7rem;
+      color: #9a3412;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+      margin-left: 0.5rem;
+    }
+
     .popup-actions {
       display: flex;
       justify-content: space-between;
@@ -215,12 +246,12 @@ import { SupabaseService } from '../../services/supabase.service';
 })
 export class HomeComponent {
   isOrderPopupOpen = false;
-  orderForm = { ristorante: '', data: '', importo: 0 };
+  orderForm = { ristorante: '', data: '', importo: 0, colore: '#f97316' };
   supabase = inject(SupabaseService);
 
   openOrderPopup() {
     this.isOrderPopupOpen = true;
-    this.orderForm = { ristorante: '', data: '', importo: 0 };
+    this.orderForm = { ristorante: '', data: new Date().toISOString().split('T')[0], importo: 0, colore: '#f97316' };
   }
 
   closeOrderPopup() {
@@ -237,7 +268,8 @@ export class HomeComponent {
         parseFloat(this.orderForm.importo.toString()),
         this.orderForm.ristorante,
         'Ristorante',
-        this.orderForm.data
+        this.orderForm.data,
+        this.orderForm.colore
       );
 
       if (error) {

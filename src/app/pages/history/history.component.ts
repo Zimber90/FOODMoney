@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
@@ -11,7 +11,6 @@ import { SupabaseService } from '../../services/supabase.service';
     <div class="history-page">
       <h1 class="title">Storico</h1>
       
-      <!-- Barra di ricerca -->
       <div class="search-container">
         <input 
           type="text" 
@@ -21,7 +20,6 @@ import { SupabaseService } from '../../services/supabase.service';
         >
       </div>
 
-      <!-- Lista ordini -->
       <div class="orders-rectangle">
         <div *ngIf="filteredOrders.length === 0" class="empty-state">
           Nessun ordine trovato
@@ -30,23 +28,23 @@ import { SupabaseService } from '../../services/supabase.service';
         <div *ngFor="let order of filteredOrders" class="order-item">
           <div class="order-info">
             <div class="order-date">{{ order.created_at | date:'dd/MM/yyyy' }}</div>
-            <div class="order-restaurant">{{ order.description }}</div>
+            <div class="order-restaurant">
+              <span class="color-swatch" [style.background-color]="order.restaurant_color"></span>
+              {{ order.description }}
+            </div>
           </div>
           <div class="order-amount">€ {{ order.amount | number:'1.2-2' }}</div>
           
-          <!-- Icona modifica -->
           <span class="edit-icon" (click)="openEditPopup(order)" title="Modifica ordine">
             ✏️
           </span>
           
-          <!-- Icona elimina -->
           <span class="delete-icon" (click)="deleteOrder(order.id)" title="Elimina ordine">
             🗑️
           </span>
         </div>
       </div>
 
-      <!-- Popup modifica ordine -->
       <div *ngIf="isEditPopupOpen" class="popup-overlay" (click)="closeEditPopup()">
         <div class="popup-modal" (click)="$event.stopPropagation()">
           <h2 class="popup-title">Modifica Ordine</h2>
@@ -90,6 +88,18 @@ import { SupabaseService } from '../../services/supabase.service';
                 class="form-input"
                 placeholder="0.00"
               >
+            </div>
+
+            <div class="form-group">
+              <label for="edit-colore">Colore Ristorante</label>
+              <input 
+                type="color" 
+                id="edit-colore" 
+                name="colore" 
+                [(ngModel)]="editForm.colore" 
+                class="form-input color-picker"
+              >
+              <small class="color-hint">Modifica il colore del ristorante</small>
             </div>
             
             <div class="popup-actions">
@@ -165,6 +175,7 @@ import { SupabaseService } from '../../services/supabase.service';
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
+      flex: 1;
     }
 
     .order-date {
@@ -177,12 +188,24 @@ import { SupabaseService } from '../../services/supabase.service';
       font-size: 1rem;
       color: #333;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .color-swatch {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      flex-shrink: 0;
     }
 
     .order-amount {
       font-size: 1rem;
       color: #9a3412;
       font-weight: 700;
+      margin: 0 1rem;
     }
 
     .empty-state {
@@ -197,7 +220,7 @@ import { SupabaseService } from '../../services/supabase.service';
       font-size: 1.2rem;
       color: #f97316;
       cursor: pointer;
-      margin-left: 1rem;
+      margin-left: 0.5rem;
       transition: color 0.2s;
     }
 
@@ -205,7 +228,6 @@ import { SupabaseService } from '../../services/supabase.service';
       color: #ea580c;
     }
 
-    /* Stile popup coerente con le altre pagine */
     .popup-overlay {
       position: fixed;
       top: 0;
@@ -266,6 +288,21 @@ import { SupabaseService } from '../../services/supabase.service';
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
 
+    .color-picker {
+      height: 50px;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    .color-hint {
+      display: block;
+      font-size: 0.7rem;
+      color: #9a3412;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+      margin-left: 0.5rem;
+    }
+
     .popup-actions {
       display: flex;
       justify-content: space-between;
@@ -309,17 +346,16 @@ import { SupabaseService } from '../../services/supabase.service';
     }
   `]
 })
-export class HistoryComponent {
+export class HistoryComponent implements OnInit {
   private supabase = inject(SupabaseService);
   orders: any[] = [];
   filteredOrders: any[] = [];
   
-  // Stato popup modifica
   isEditPopupOpen = false;
   editingOrder: any = null;
-  editForm = { ristorante: '', data: '', importo: 0 };
+  editForm = { ristorante: '', data: '', importo: 0, colore: '#f97316' };
 
-  constructor() {
+  ngOnInit() {
     this.loadOrders();
   }
 
@@ -345,25 +381,23 @@ export class HistoryComponent {
     });
   }
 
-  // Apre popup modifica con dati pre-compilati
   openEditPopup(order: any) {
     this.editingOrder = order;
     this.editForm = {
       ristorante: order.description,
       importo: order.amount,
-      data: new Date(order.created_at).toISOString().split('T')[0] // Formato YYYY-MM-DD per input date
+      data: new Date(order.created_at).toISOString().split('T')[0],
+      colore: order.restaurant_color || '#f97316'
     };
     this.isEditPopupOpen = true;
   }
 
-  // Chiude popup modifica
   closeEditPopup() {
     this.isEditPopupOpen = false;
     this.editingOrder = null;
-    this.editForm = { ristorante: '', data: '', importo: 0 };
+    this.editForm = { ristorante: '', data: '', importo: 0, colore: '#f97316' };
   }
 
-  // Salva modifiche ordine
   async saveEditedOrder() {
     if (!this.editingOrder || !this.editForm.ristorante || !this.editForm.data || !this.editForm.importo) {
       return;
@@ -375,7 +409,8 @@ export class HistoryComponent {
         this.editForm.importo,
         this.editForm.ristorante,
         'Ristorante',
-        this.editForm.data
+        this.editForm.data,
+        this.editForm.colore
       );
 
       if (error) {
@@ -383,14 +418,14 @@ export class HistoryComponent {
         return;
       }
 
-      // Aggiorna lista locale
       const index = this.orders.findIndex(o => o.id === this.editingOrder.id);
       if (index !== -1) {
         this.orders[index] = {
           ...this.orders[index],
           description: this.editForm.ristorante,
           amount: this.editForm.importo,
-          created_at: this.editForm.data
+          created_at: this.editForm.data,
+          restaurant_color: this.editForm.colore
         };
         this.filteredOrders = [...this.orders];
       }
@@ -401,7 +436,6 @@ export class HistoryComponent {
     }
   }
 
-  // Elimina ordine
   deleteOrder(id: string) {
     this.supabase.deleteExpense(id).then(() => {
       this.orders = this.orders.filter(o => o.id !== id);
