@@ -1,13 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
-import { startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, format, parseISO } from 'date-fns';
+import { 
+  startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear, format, parseISO,
+  startOfWeek, endOfWeek, eachWeekOfInterval, eachMonthOfInterval, addYears
+} from 'date-fns';
 import { it } from 'date-fns/locale';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="stats-page">
       <h1 class="page-title">Statistiche</h1>
@@ -25,6 +29,36 @@ import { it } from 'date-fns/locale';
         }
       </div>
 
+      <!-- Restaurant Search Section -->
+      <div class="restaurant-search-section">
+        <h2 class="section-title">Cerca Ristorante</h2>
+        <div class="search-container">
+          <input 
+            type="text" 
+            placeholder="Cerca ristorante..." 
+            [(ngModel)]="searchQuery"
+            (input)="onRestaurantSearch()"
+            class="search-input"
+          >
+          @if (filteredRestaurants.length > 0 && searchQuery.trim()) {
+            <div class="search-dropdown">
+              @for (restaurant of filteredRestaurants; track restaurant) {
+                <div class="search-item" (click)="selectRestaurant(restaurant)">
+                  {{ restaurant }}
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        @if (selectedRestaurant) {
+          <div class="selected-restaurant-banner">
+            <span>Statistiche per: <strong>{{ selectedRestaurant }}</strong></span>
+            <button class="clear-btn" (click)="clearRestaurantSelection()">✕</button>
+          </div>
+        }
+      </div>
+
       <!-- Loading State -->
       @if (loading) {
         <div class="loading-state">Caricamento statistiche...</div>
@@ -35,7 +69,7 @@ import { it } from 'date-fns/locale';
         <div class="empty-state">Nessun dato disponibile per il periodo selezionato</div>
       }
 
-      <!-- Stats Content -->
+      <!-- Main Stats Content -->
       @if (!loading && filteredExpenses.length > 0) {
         <!-- Summary Cards -->
         <div class="summary-cards">
@@ -58,7 +92,7 @@ import { it } from 'date-fns/locale';
           <h2 class="section-title">Top Ristoranti</h2>
           <div class="top-restaurants">
             @for (restaurant of topRestaurants; track restaurant.name) {
-              <div class="restaurant-item">
+              <div class="restaurant-item" (click)="selectRestaurant(restaurant.name)">
                 <div class="restaurant-info">
                   <span class="color-swatch" [style.background-color]="restaurant.color"></span>
                   <div class="restaurant-details">
@@ -85,6 +119,77 @@ import { it } from 'date-fns/locale';
             }
           </div>
         </div>
+
+        <!-- Selected Restaurant Detail Section -->
+        @if (selectedRestaurant) {
+          <div class="section restaurant-detail-section">
+            <h2 class="section-title">Dettagli: {{ selectedRestaurant }}</h2>
+            
+            <!-- Restaurant Summary Cards -->
+            <div class="summary-cards">
+              <div class="summary-card">
+                <div class="summary-label">Totale Speso (Periodo)</div>
+                <div class="summary-value">€ {{ restaurantTotalSpent | number:'1.2-2' }}</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Media per Ordine</div>
+                <div class="summary-value">€ {{ restaurantAvgSpend | number:'1.2-2' }}</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Numero Ordini</div>
+                <div class="summary-value">{{ restaurantOrderCount }}</div>
+              </div>
+            </div>
+
+            <!-- Weekly Spend Breakdown -->
+            @if (restaurantWeeklyData.length > 0) {
+              <div class="section">
+                <h3 class="sub-section-title">Spesa Settimanale</h3>
+                <div class="weekly-chart">
+                  @for (week of restaurantWeeklyData; track week.label) {
+                    <div class="chart-bar-container">
+                      <div class="chart-amount">€ {{ week.total | number:'1.0-0' }}</div>
+                      <div class="chart-bar" [style.height.%]="week.heightPercent" [style.background-color]="'#f97316'"></div>
+                      <div class="chart-label">{{ week.label }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Monthly Spend Breakdown for Restaurant -->
+            @if (restaurantMonthlyData.length > 0) {
+              <div class="section">
+                <h3 class="sub-section-title">Spesa Mensile</h3>
+                <div class="monthly-chart">
+                  @for (month of restaurantMonthlyData; track month.month) {
+                    <div class="chart-bar-container">
+                      <div class="chart-amount">€ {{ month.total | number:'1.0-0' }}</div>
+                      <div class="chart-bar" [style.height.%]="month.heightPercent" [style.background-color]="'#f97316'"></div>
+                      <div class="chart-label">{{ month.shortMonth }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Yearly Spend Breakdown for Restaurant -->
+            @if (restaurantYearlyData.length > 0) {
+              <div class="section">
+                <h3 class="sub-section-title">Spesa Annuale</h3>
+                <div class="monthly-chart">
+                  @for (year of restaurantYearlyData; track year.year) {
+                    <div class="chart-bar-container">
+                      <div class="chart-amount">€ {{ year.total | number:'1.0-0' }}</div>
+                      <div class="chart-bar" [style.height.%]="year.heightPercent" [style.background-color]="'#f97316'"></div>
+                      <div class="chart-label">{{ year.year }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
       }
     </div>
   `,
@@ -137,6 +242,76 @@ import { it } from 'date-fns/locale';
     }
     .period-pill:hover:not(.active) {
       background: #fffcf9;
+    }
+
+    /* Restaurant Search Section */
+    .restaurant-search-section {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 2rem;
+    }
+    .search-container {
+      position: relative;
+      width: 100%;
+    }
+    .search-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #fed7aa;
+      border-radius: 1rem;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+      background: #fffcf9;
+    }
+    .search-input:focus {
+      border-color: #f97316;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+    .search-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #fed7aa;
+      border-top: none;
+      border-radius: 0 0 1rem 1rem;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    .search-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      color: #333;
+      font-size: 0.95rem;
+    }
+    .search-item:hover {
+      background: #fff7ed;
+    }
+    .selected-restaurant-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: white;
+      border: 2px solid #f97316;
+      border-radius: 1rem;
+      margin-top: 1rem;
+      color: #9a3412;
+      font-size: 0.95rem;
+    }
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #f97316;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0 0.5rem;
     }
 
     /* Loading & Empty States */
@@ -193,6 +368,13 @@ import { it } from 'date-fns/locale';
       margin-bottom: 1rem;
       padding-left: 0.5rem;
     }
+    .sub-section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #9a3412;
+      margin-bottom: 1rem;
+      padding-left: 0.5rem;
+    }
 
     /* Top Restaurants */
     .top-restaurants {
@@ -207,6 +389,14 @@ import { it } from 'date-fns/locale';
       align-items: center;
       padding: 1rem 0;
       border-bottom: 1px solid #fed7aa;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-radius: 0.5rem;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    .restaurant-item:hover {
+      background: #fff7ed;
     }
     .restaurant-item:last-child {
       border-bottom: none;
@@ -246,8 +436,8 @@ import { it } from 'date-fns/locale';
       margin-left: 1rem;
     }
 
-    /* Monthly Chart */
-    .monthly-chart {
+    /* Charts (Monthly, Weekly, Yearly) */
+    .monthly-chart, .weekly-chart {
       background-color: #fff;
       border-radius: 2rem;
       padding: 1.5rem;
@@ -286,6 +476,14 @@ import { it } from 'date-fns/locale';
       text-transform: capitalize;
     }
 
+    /* Restaurant Detail Section */
+    .restaurant-detail-section {
+      background: white;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
+    }
+
     @media (max-width: 768px) {
       .summary-cards {
         flex-direction: column;
@@ -307,6 +505,10 @@ export class StatsComponent implements OnInit {
   filteredExpenses: any[] = [];
   selectedPeriod = 'this-month';
 
+  // Period filter dates
+  startDate: Date | null = null;
+  endDate: Date | null = null;
+
   periods = [
     { label: 'Questo mese', value: 'this-month' },
     { label: 'Ultimo mese', value: 'last-month' },
@@ -315,7 +517,7 @@ export class StatsComponent implements OnInit {
     { label: 'Tutto', value: 'all' }
   ];
 
-  // Summary stats
+  // Main summary stats
   totalSpent = 0;
   averageSpend = 0;
   orderCount = 0;
@@ -323,8 +525,22 @@ export class StatsComponent implements OnInit {
   // Top restaurants
   topRestaurants: any[] = [];
 
-  // Monthly data
+  // Main monthly data
   monthlyData: any[] = [];
+
+  // Restaurant search
+  searchQuery = '';
+  selectedRestaurant: string | null = null;
+  filteredRestaurants: string[] = [];
+
+  // Selected restaurant stats
+  restaurantExpenses: any[] = [];
+  restaurantTotalSpent = 0;
+  restaurantAvgSpend = 0;
+  restaurantOrderCount = 0;
+  restaurantWeeklyData: any[] = [];
+  restaurantMonthlyData: any[] = [];
+  restaurantYearlyData: any[] = [];
 
   ngOnInit() {
     this.loadExpenses();
@@ -347,50 +563,53 @@ export class StatsComponent implements OnInit {
   selectPeriod(period: string) {
     this.selectedPeriod = period;
     this.filterExpenses();
+    if (this.selectedRestaurant) {
+      this.calculateRestaurantStats();
+    }
   }
 
   filterExpenses() {
     const now = new Date();
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
+    this.startDate = null;
+    this.endDate = null;
 
     switch (this.selectedPeriod) {
       case 'this-month':
-        startDate = startOfMonth(now);
-        endDate = endOfMonth(now);
+        this.startDate = startOfMonth(now);
+        this.endDate = endOfMonth(now);
         break;
       case 'last-month':
         const lastMonth = subMonths(now, 1);
-        startDate = startOfMonth(lastMonth);
-        endDate = endOfMonth(lastMonth);
+        this.startDate = startOfMonth(lastMonth);
+        this.endDate = endOfMonth(lastMonth);
         break;
       case 'last-3-months':
-        startDate = startOfMonth(subMonths(now, 2));
-        endDate = endOfMonth(now);
+        this.startDate = startOfMonth(subMonths(now, 2));
+        this.endDate = endOfMonth(now);
         break;
       case 'this-year':
-        startDate = startOfYear(now);
-        endDate = endOfYear(now);
+        this.startDate = startOfYear(now);
+        this.endDate = endOfYear(now);
         break;
       case 'all':
       default:
-        startDate = null;
-        endDate = null;
+        this.startDate = null;
+        this.endDate = null;
         break;
     }
 
     this.filteredExpenses = this.allExpenses.filter(expense => {
       const expenseDate = parseISO(expense.created_at);
       if (isNaN(expenseDate.getTime())) return false;
-      if (!startDate || !endDate) return true;
-      return expenseDate >= startDate && expenseDate <= endDate;
+      if (!this.startDate || !this.endDate) return true;
+      return expenseDate >= this.startDate && expenseDate <= this.endDate;
     });
 
     this.calculateStats();
   }
 
   calculateStats() {
-    // Summary stats
+    // Main summary stats
     this.orderCount = this.filteredExpenses.length;
     this.totalSpent = this.filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
     this.averageSpend = this.orderCount > 0 ? this.totalSpent / this.orderCount : 0;
@@ -416,7 +635,11 @@ export class StatsComponent implements OnInit {
       .sort((a, b) => b.total - a.total)
       .slice(0, 5);
 
-    // Monthly data
+    // Main monthly data
+    this.calculateMainMonthlyData();
+  }
+
+  calculateMainMonthlyData() {
     const monthMap = new Map<string, number>();
     this.filteredExpenses.forEach(exp => {
       const expenseDate = parseISO(exp.created_at);
@@ -434,6 +657,138 @@ export class StatsComponent implements OnInit {
       total,
       shortMonth: format(parseISO(monthKey + '-01'), 'MMM', { locale: it }),
       heightPercent: (total / maxMonthTotal) * 100
+    }));
+  }
+
+  // Restaurant search methods
+  onRestaurantSearch() {
+    if (!this.searchQuery.trim()) {
+      this.filteredRestaurants = [];
+      return;
+    }
+    const allRestaurants = [...new Set(this.allExpenses.map(exp => exp.description))];
+    this.filteredRestaurants = allRestaurants.filter(name => 
+      name.toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+  }
+
+  selectRestaurant(restaurantName: string) {
+    this.selectedRestaurant = restaurantName;
+    this.searchQuery = restaurantName;
+    this.filteredRestaurants = [];
+    this.calculateRestaurantStats();
+  }
+
+  clearRestaurantSelection() {
+    this.selectedRestaurant = null;
+    this.searchQuery = '';
+    this.restaurantExpenses = [];
+    this.restaurantWeeklyData = [];
+    this.restaurantMonthlyData = [];
+    this.restaurantYearlyData = [];
+  }
+
+  calculateRestaurantStats() {
+    if (!this.selectedRestaurant) return;
+
+    // Filter expenses for selected restaurant and current period
+    this.restaurantExpenses = this.allExpenses.filter(exp => {
+      if (exp.description !== this.selectedRestaurant) return false;
+      const expenseDate = parseISO(exp.created_at);
+      if (isNaN(expenseDate.getTime())) return false;
+      if (!this.startDate || !this.endDate) return true;
+      return expenseDate >= this.startDate && expenseDate <= this.endDate;
+    });
+
+    // Restaurant summary
+    this.restaurantOrderCount = this.restaurantExpenses.length;
+    this.restaurantTotalSpent = this.restaurantExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    this.restaurantAvgSpend = this.restaurantOrderCount > 0 ? this.restaurantTotalSpent / this.restaurantOrderCount : 0;
+
+    // Weekly breakdown
+    this.calculateRestaurantWeeklyData();
+    // Monthly breakdown
+    this.calculateRestaurantMonthlyData();
+    // Yearly breakdown
+    this.calculateRestaurantYearlyData();
+  }
+
+  calculateRestaurantWeeklyData() {
+    if (this.restaurantExpenses.length === 0) {
+      this.restaurantWeeklyData = [];
+      return;
+    }
+
+    const dates = this.restaurantExpenses.map(exp => parseISO(exp.created_at)).filter(d => !isNaN(d.getTime()));
+    if (dates.length === 0) {
+      this.restaurantWeeklyData = [];
+      return;
+    }
+
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+    const weeks = eachWeekOfInterval({ start: minDate, end: maxDate }, { weekStartsOn: 1 }); // Monday start for Italy
+
+    const weekMap = new Map<string, number>();
+    weeks.forEach(weekStart => {
+      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
+      const total = this.restaurantExpenses.filter(exp => {
+        const expDate = parseISO(exp.created_at);
+        return expDate >= weekStart && expDate <= weekEnd;
+      }).reduce((sum, exp) => sum + exp.amount, 0);
+
+      const weekLabel = format(weekStart, 'dd/MM');
+      weekMap.set(weekLabel, total);
+    });
+
+    const weekEntries = Array.from(weekMap.entries());
+    const maxWeekTotal = Math.max(...weekEntries.map(e => e[1]), 1);
+
+    this.restaurantWeeklyData = weekEntries.map(([label, total]) => ({
+      label,
+      total,
+      heightPercent: (total / maxWeekTotal) * 100
+    }));
+  }
+
+  calculateRestaurantMonthlyData() {
+    const monthMap = new Map<string, number>();
+    this.restaurantExpenses.forEach(exp => {
+      const expenseDate = parseISO(exp.created_at);
+      if (isNaN(expenseDate.getTime())) return;
+      const monthKey = format(expenseDate, 'yyyy-MM');
+      const existing = monthMap.get(monthKey) || 0;
+      monthMap.set(monthKey, existing + exp.amount);
+    });
+
+    const monthEntries = Array.from(monthMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    const maxMonthTotal = Math.max(...monthEntries.map(e => e[1]), 1);
+
+    this.restaurantMonthlyData = monthEntries.map(([monthKey, total]) => ({
+      month: monthKey,
+      total,
+      shortMonth: format(parseISO(monthKey + '-01'), 'MMM', { locale: it }),
+      heightPercent: (total / maxMonthTotal) * 100
+    }));
+  }
+
+  calculateRestaurantYearlyData() {
+    const yearMap = new Map<string, number>();
+    this.restaurantExpenses.forEach(exp => {
+      const expenseDate = parseISO(exp.created_at);
+      if (isNaN(expenseDate.getTime())) return;
+      const yearKey = format(expenseDate, 'yyyy');
+      const existing = yearMap.get(yearKey) || 0;
+      yearMap.set(yearKey, existing + exp.amount);
+    });
+
+    const yearEntries = Array.from(yearMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    const maxYearTotal = Math.max(...yearEntries.map(e => e[1]), 1);
+
+    this.restaurantYearlyData = yearEntries.map(([year, total]) => ({
+      year,
+      total,
+      heightPercent: (total / maxYearTotal) * 100
     }));
   }
 }
