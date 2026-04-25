@@ -8,23 +8,15 @@ import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } 
   imports: [CommonModule],
   template: `
     <div class="calendar-page">
-      <!-- Calendario SVG nella metà superiore -->
-      <div class="calendar-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="calendar-svg">
-          <rect x="3" y="4" width="18" height="18" rx="2" />
-          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-          <line x1="3" y1="9" x2="21" y2="9" />
-        </svg>
+      <!-- Barra di navigazione mesi -->
+      <div class="calendar-nav">
+        <button (click)="prevMonth()" class="nav-btn">◀</button>
+        <div class="calendar-title">{{ currentMonth }} {{ currentYear }}</div>
+        <button (click)="nextMonth()" class="nav-btn">▶</button>
       </div>
 
       <!-- Calendario interattivo -->
       <div class="calendar-container">
-        <div class="calendar-nav">
-          <button (click)="prevMonth()" class="nav-btn">◀</button>
-          <div class="calendar-title">{{ currentMonth }} {{ currentYear }}</div>
-          <button (click)="nextMonth()" class="nav-btn">▶</button>
-        </div>
-
         <div class="calendar-grid">
           <!-- Intestazione giorni settimana -->
           <div class="weekdays-row">
@@ -56,36 +48,13 @@ import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } 
       margin: 0;
     }
 
-    .calendar-header {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem 1rem;
-      background: #fff7ed;
-    }
-
-    .calendar-svg {
-      width: 120px;
-      height: 120px;
-      color: #16a34a;
-      filter: drop-shadow(0 4px 6px rgba(22, 163, 74, 0.1));
-    }
-
-    .calendar-container {
-      background: white;
-      border-radius: 2rem 2rem 0 0;
-      padding: 1.5rem;
-      box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.05);
-      flex: 1;
-    }
-
     .calendar-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-      padding: 0 0.5rem;
+      padding: 1rem 1.5rem;
+      background: white;
+      border-bottom: 1px solid #e9ecef;
     }
 
     .nav-btn {
@@ -108,6 +77,12 @@ import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } 
       font-weight: 700;
       color: #166534;
       text-transform: capitalize;
+    }
+
+    .calendar-container {
+      background: white;
+      padding: 1.5rem;
+      flex: 1;
     }
 
     .calendar-grid {
@@ -165,11 +140,10 @@ import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } 
     }
 
     @media (max-width: 768px) {
-      .calendar-svg {
-        width: 80px;
-        height: 80px;
+      .calendar-nav {
+        padding: 0.75rem 1rem;
       }
-
+      
       .day-cell {
         padding: 0.5rem 0;
         font-size: 0.85rem;
