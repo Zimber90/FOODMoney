@@ -52,7 +52,7 @@ export class SupabaseService {
     }
   }
 
-  async addExpense(amount: number, description: string, category: string) {
+  async addExpense(amount: number, description: string, category: string, expenseDate?: string) {
     const user = this._user.value;
     if (!user) throw new Error('Utente non autenticato');
     
@@ -62,7 +62,8 @@ export class SupabaseService {
         amount, 
         description, 
         category,
-        user_id: user.id 
+        user_id: user.id,
+        expense_date: expenseDate || null
       }])
       .select();
     

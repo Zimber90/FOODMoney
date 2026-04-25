@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } from 'date-fns';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="calendar-page">
       <!-- Barra di navigazione mesi -->
@@ -36,6 +38,65 @@ import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } 
           </div>
         </div>
       </div>
+
+      <!-- FAB per creare ordini -->
+      <button class="fab" (click)="openOrderPopup()">
+        <span class="fab-icon">+</span>
+      </button>
+
+      <!-- Popup creazione ordine -->
+      <div *ngIf="isOrderPopupOpen" class="popup-overlay" (click)="closeOrderPopup()">
+        <div class="popup-modal" (click)="$event.stopPropagation()">
+          <h2 class="popup-title">Crea Ordine</h2>
+          
+          <form (ngSubmit)="saveOrder()" #orderFormRef="ngForm">
+            <div class="form-group">
+              <label for="ristorante">Ristorante</label>
+              <input 
+                type="text" 
+                id="ristorante" 
+                name="ristorante" 
+                [(ngModel)]="orderForm.ristorante" 
+                required 
+                class="form-input"
+                placeholder="Nome ristorante"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="data">Data</label>
+              <input 
+                type="date" 
+                id="data" 
+                name="data" 
+                [(ngModel)]="orderForm.data" 
+                required 
+                class="form-input"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="importo">Importo</label>
+              <input 
+                type="number" 
+                id="importo" 
+                name="importo" 
+                [(ngModel)]="orderForm.importo" 
+                required 
+                min="0" 
+                step="0.01" 
+                class="form-input"
+                placeholder="0.00"
+              >
+            </div>
+            
+            <div class="popup-actions">
+              <button type="button" class="btn-close" (click)="closeOrderPopup()">Chiudi</button>
+              <button type="submit" class="btn-save">Salva Ordine</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -46,6 +107,7 @@ import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } 
       background: #fff7ed;
       padding: 0;
       margin: 0;
+      position: relative;
     }
 
     .calendar-nav {
@@ -139,6 +201,138 @@ import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } 
       cursor: default;
     }
 
+    /* FAB Styles */
+    .fab {
+      position: fixed;
+      bottom: 100px;
+      right: 1.5rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: #f97316;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.3);
+      transition: all 0.2s;
+      z-index: 101;
+    }
+
+    .fab:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+    }
+
+    .fab-icon {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* Popup Styles */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 102;
+    }
+
+    .popup-modal {
+      background: white;
+      border-radius: 2rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .popup-title {
+      text-align: center;
+      color: #9a3412;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #9a3412;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      margin-left: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #fed7aa;
+      border-radius: 1rem;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+      background: #fffcf9;
+    }
+
+    .form-input:focus {
+      border-color: #f97316;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    .popup-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      gap: 1rem;
+    }
+
+    .btn-close {
+      flex: 1;
+      padding: 1rem;
+      background: #f0f0f0;
+      color: #666;
+      border: none;
+      border-radius: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-close:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-save {
+      flex: 1;
+      padding: 1rem;
+      background: #f97316;
+      color: white;
+      border: none;
+      border-radius: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      background: #ea580c;
+      transform: translateY(-2px);
+    }
+
     @media (max-width: 768px) {
       .calendar-nav {
         padding: 0.75rem 1rem;
@@ -148,50 +342,63 @@ import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } 
         padding: 0.5rem 0;
         font-size: 0.85rem;
       }
+
+      .fab {
+        bottom: 90px;
+        right: 1rem;
+        width: 48px;
+        height: 48px;
+      }
+
+      .fab-icon {
+        font-size: 1.25rem;
+      }
     }
   `]
 })
 export class CalendarComponent {
+  private supabase = inject(SupabaseService);
   currentDate = new Date();
   currentMonth: string = '';
   currentYear: number = 0;
   weekdays = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
   calendarWeeks: { date: Date }[][] = [];
+  isOrderPopupOpen = false;
+  orderForm = {
+    ristorante: '',
+    data: '',
+    importo: 0
+  };
 
   constructor() {
     this.generateCalendar();
   }
 
   generateCalendar() {
-    // Update month/year display
     this.currentMonth = format(this.currentDate, 'MMMM');
     this.currentYear = getYear(this.currentDate);
 
     const firstDayOfMonth = startOfMonth(this.currentDate);
     const lastDayOfMonth = endOfMonth(this.currentDate);
     const totalDaysInMonth = lastDayOfMonth.getDate();
-    const startDayOfWeek = getDay(firstDayOfMonth); // 0 = Sunday
+    const startDayOfWeek = getDay(firstDayOfMonth);
 
-    // Current month days
     const currentMonthDays = Array.from({ length: totalDaysInMonth }, (_, i) => ({
       date: new Date(getYear(this.currentDate), getMonth(this.currentDate), i + 1)
     }));
 
-    // Previous month trailing days
     const prevMonthDays = Array.from({ length: startDayOfWeek }, (_, i) => {
       const date = new Date(getYear(this.currentDate), getMonth(this.currentDate), 0);
       date.setDate(date.getDate() - (startDayOfWeek - 1 - i));
       return { date };
     });
 
-    // Next month leading days
     const totalCells = Math.ceil((startDayOfWeek + totalDaysInMonth) / 7) * 7;
     const nextMonthDaysCount = totalCells - (startDayOfWeek + totalDaysInMonth);
     const nextMonthDays = Array.from({ length: nextMonthDaysCount }, (_, i) => ({
       date: new Date(getYear(this.currentDate), getMonth(this.currentDate) + 1, i + 1)
     }));
 
-    // Combine all days and group into weeks
     const allDays = [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
     const weeks: { date: Date }[][] = [];
     for (let i = 0; i < allDays.length; i += 7) {
@@ -217,5 +424,42 @@ export class CalendarComponent {
 
   isOtherMonth(date: Date): boolean {
     return getMonth(date) !== getMonth(this.currentDate) || getYear(date) !== getYear(this.currentDate);
+  }
+
+  openOrderPopup() {
+    this.isOrderPopupOpen = true;
+  }
+
+  closeOrderPopup() {
+    this.isOrderPopupOpen = false;
+    this.resetOrderForm();
+  }
+
+  resetOrderForm() {
+    this.orderForm = { ristorante: '', data: '', importo: 0 };
+  }
+
+  async saveOrder() {
+    if (!this.orderForm.ristorante || !this.orderForm.data || !this.orderForm.importo) {
+      return;
+    }
+
+    try {
+      const { error } = await this.supabase.addExpense(
+        this.orderForm.importo,
+        this.orderForm.ristorante,
+        'Ristorante',
+        this.orderForm.data
+      );
+
+      if (error) {
+        console.error('Errore nel salvataggio ordine:', error);
+        return;
+      }
+
+      this.closeOrderPopup();
+    } catch (error) {
+      console.error('Errore nel salvataggio ordine:', error);
+    }
   }
 }
