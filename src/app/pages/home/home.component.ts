@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HistoryComponent } from '../history/history.component';
+import { FormsModule } from '@angular/forms';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="sandwich-container">
       <svg class="sandwich-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -233,7 +234,7 @@ export class HomeComponent {
 
     try {
       const { error } = await this.supabase.addExpense(
-        parseFloat(this.orderForm.importo),
+        parseFloat(this.orderForm.importo.toString()),
         this.orderForm.ristorante,
         'Ristorante',
         this.orderForm.data
