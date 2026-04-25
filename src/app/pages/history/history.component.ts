@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
+import { LucidePencil, LucideTrash } from '@supabase/ui'; // Importa gli iconi Lucide
 
 @Component({
   selector: 'app-history',
@@ -33,6 +34,20 @@ import { SupabaseService } from '../../services/supabase.service';
             <div class="order-restaurant">{{ order.description }}</div>
           </div>
           <div class="order-amount">€ {{ order.amount | number:'1.2-2' }}</div>
+          
+          <!-- Icone di modifica -->
+          <lucide-pencil 
+            class="edit-icon" 
+            (click)="editOrder(order)" 
+            style="margin-left: 1rem; cursor: pointer;"
+          ></lucide-pencil>
+          
+          <!-- Icone di eliminazione -->
+          <lucide-trash 
+            class="delete-icon" 
+            (click)="deleteOrder(order.id)" 
+            style="margin-left: 1rem; cursor: pointer;"
+          ></lucide-trash>
         </div>
       </div>
     </div>
@@ -130,6 +145,17 @@ import { SupabaseService } from '../../services/supabase.service';
       font-size: 0.95rem;
     }
 
+    /* Stile per le icone */
+    .edit-icon, .delete-icon {
+      font-size: 1.2rem;
+      color: #f97316;
+      transition: color 0.2s;
+    }
+
+    .edit-icon:hover, .delete-icon:hover {
+      color: #ea580c;
+    }
+
     @media (max-width: 768px) {
       .search-container, .orders-rectangle {
         width: 90%;
@@ -165,6 +191,22 @@ export class HistoryComponent {
         order.description.toLowerCase().includes(query) ||
         formattedDate.includes(query)
       );
+    });
+  }
+
+  // Funzione per modificare un ordine
+  editOrder(order: any) {
+    // Qui puoi implementare la logica per modificare l'ordine
+    // Esempio: apri un form per modificare i dettagli
+    console.log('Modifica ordine:', order);
+  }
+
+  // Funzione per eliminare un ordine
+  deleteOrder(id: string) {
+    this.supabase.deleteExpense(id).then(() => {
+      // Rimuovi l'ordine dalla lista
+      this.orders = this.orders.filter(o => o.id !== id);
+      this.filteredOrders = [...this.orders];
     });
   }
 }
