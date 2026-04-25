@@ -2,12 +2,11 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
-import { LucidePencil, LucideTrash } from 'lucide-angular'; // Import corretto da lucide-angular
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucidePencil, LucideTrash], // Registrazione icone
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="history-page">
       <h1 class="title">Storico</h1>
@@ -36,18 +35,14 @@ import { LucidePencil, LucideTrash } from 'lucide-angular'; // Import corretto d
           <div class="order-amount">€ {{ order.amount | number:'1.2-2' }}</div>
           
           <!-- Icona di modifica -->
-          <lucide-pencil 
-            class="edit-icon" 
-            (click)="editOrder(order)" 
-            style="margin-left: 1rem; cursor: pointer;"
-          ></lucide-pencil>
+          <span class="edit-icon" (click)="editOrder(order)" title="Modifica ordine">
+            ✏️
+          </span>
           
           <!-- Icona di eliminazione -->
-          <lucide-trash 
-            class="delete-icon" 
-            (click)="deleteOrder(order.id)" 
-            style="margin-left: 1rem; cursor: pointer;"
-          ></lucide-trash>
+          <span class="delete-icon" (click)="deleteOrder(order.id)" title="Elimina ordine">
+            🗑️
+          </span>
         </div>
       </div>
     </div>
@@ -144,9 +139,12 @@ import { LucidePencil, LucideTrash } from 'lucide-angular'; // Import corretto d
       font-size: 0.95rem;
     }
 
+    /* Stile per le icone */
     .edit-icon, .delete-icon {
       font-size: 1.2rem;
       color: #f97316;
+      cursor: pointer;
+      margin-left: 1rem;
       transition: color 0.2s;
     }
 
@@ -195,7 +193,7 @@ export class HistoryComponent {
   // Placeholder per la modifica dell'ordine
   editOrder(order: any) {
     console.log('Modifica ordine:', order);
-    // Qui potrai aprire un modal o un form per modificare i dati
+    // Qui potrai implementare la logica per modificare i dettagli
   }
 
   // Eliminazione ordine
