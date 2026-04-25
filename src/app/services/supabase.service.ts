@@ -50,7 +50,7 @@ export class SupabaseService {
     }
   }
 
-  async addExpense(amount: number, description: string, category: string, expenseDate?: string) {
+  async addExpense(amount: number, description: string, category: string, expenseDate?: string, restaurantColor?: string) {
     const user = this._user.value;
     if (!user) throw new Error('Utente non autenticato');
     
@@ -61,7 +61,8 @@ export class SupabaseService {
         description, 
         category,
         user_id: user.id,
-        created_at: expenseDate || null
+        created_at: expenseDate || null,
+        restaurant_color: restaurantColor || '#f97316'
       }])
       .select();
     
@@ -69,7 +70,7 @@ export class SupabaseService {
     return { data, error: null };
   }
 
-  async updateExpense(id: string, amount: number, description: string, category: string, expenseDate?: string) {
+  async updateExpense(id: string, amount: number, description: string, category: string, expenseDate?: string, restaurantColor?: string) {
     const user = this._user.value;
     if (!user) throw new Error('Utente non autenticato');
     
@@ -79,7 +80,8 @@ export class SupabaseService {
         amount, 
         description, 
         category,
-        created_at: expenseDate || null 
+        created_at: expenseDate || null,
+        restaurant_color: restaurantColor || '#f97316'
       })
       .eq('id', id)
       .eq('user_id', user.id)
