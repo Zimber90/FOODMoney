@@ -11,6 +11,7 @@ import { SupabaseService } from '../../services/supabase.service';
     <div class="history-page">
       <h1 class="title">Storico</h1>
       
+      <!-- Barra di ricerca -->
       <div class="search-container">
         <input 
           type="text" 
@@ -19,11 +20,26 @@ import { SupabaseService } from '../../services/supabase.service';
           class="search-input"
         >
       </div>
+
+      <!-- Rettangolo arrotondato con sfondo colorato per la lista ordini -->
+      <div class="orders-rectangle">
+        <div *ngIf="filteredOrders.length === 0" class="empty-state">
+          Nessun ordine trovato
+        </div>
+
+        <div *ngFor="let order of filteredOrders" class="order-item">
+          <div class="order-info">
+            <div class="order-date">{{ order.created_at | date:'dd/MM/yyyy' }}</div>
+            <div class="order-restaurant">{{ order.description }}</div>
+          </div>
+          <div class="order-amount">€ {{ order.amount | number:'1.2-2' }}</div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
     .history-page {
-      padding: 2rem;
+      padding: 2rem 1rem;
       min-height: calc(100vh - 80px);
       background: white;
       display: flex;
@@ -42,28 +58,80 @@ import { SupabaseService } from '../../services/supabase.service';
     .search-container {
       width: 100%;
       max-width: 400px;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .search-input {
       width: 100%;
       padding: 1rem;
-      border: 2px solid #f97316;
+      border: 2px solid #fed7aa;
       border-radius: 1rem;
       font-size: 1rem;
       outline: none;
       transition: all 0.2s;
       background: #fffcf9;
     }
-
     .search-input:focus {
       border-color: #f97316;
       background: white;
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
 
+    /* Stile per il rettangolo arrotondato con lista ordini */
+    .orders-rectangle {
+      background-color: #fff7ed;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid #fed7aa;
+    }
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .order-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .order-date {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #9a3412;
+    }
+
+    .order-restaurant {
+      font-size: 1rem;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .order-amount {
+      font-size: 1rem;
+      color: #9a3412;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #9a3412;
+      opacity: 0.6;
+      padding: 2rem 0;
+      font-size: 0.95rem;
+    }
+
     @media (max-width: 768px) {
-      .search-container {
+      .search-container, .orders-rectangle {
         width: 90%;
       }
     }
@@ -80,17 +148,23 @@ export class HistoryComponent {
 
   loadOrders() {
     this.supabase.getExpenses().then(response => {
-      this.orders = response.data;
+      this.orders = response.data || [];
       this.filteredOrders = this.orders;
     });
   }
 
   onSearch(event: Event) {
     const input = event.target as HTMLInputElement;
-    const query = input.value;
-    this.filteredOrders = this.orders.filter(order => 
-      order.ristorante.toLowerCase().includes(query.toLowerCase()) ||
-      order.date.toLowerCase().includes(query.toLowerCase())
-    );
+    const query = input.value.toLowerCase();
+    
+    this.filteredOrders = this.orders.filter(order => {
+      const orderDate = new Date(order.created_at);
+      const formattedDate = orderDate.toLocaleDateString('it-IT');
+      
+      return (
+        order.description.toLowerCase().includes(query) ||
+        formattedDate.includes(query)
+      );
+    });
   }
 }
