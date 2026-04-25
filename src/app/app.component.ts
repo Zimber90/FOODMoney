@@ -25,7 +25,7 @@ import { AuthComponent } from './components/auth/auth.component';
 
         <!-- Navbar inferiore -->
         <nav class="bottom-nav">
-          <a *ngFor="let item of navItems" [routerLink]="item.link" class="nav-item">
+          <a *ngFor="let item of navItems" (click)="navigateTo(item.link)" class="nav-item">
             <span class="nav-icon">{{ item.icon }}</span>
             <span class="nav-label">{{ item.label }}</span>
           </a>
@@ -130,10 +130,14 @@ export class AppComponent {
   supabase = inject(SupabaseService);
 
   navItems = [
-    { icon: '🏠', label: 'Home', link: ['/'] },
-    { icon: '📅', label: 'Calendario', link: ['/calendar'] },
-    { icon: '📜', label: 'Storico', link: ['/history'] },
-    { icon: '📊', label: 'Statistiche', link: ['/stats'] },
-    { icon: '⋮', label: 'Altro', link: ['/more'] }
+    { icon: '🏠', label: 'Home', link: '/' },
+    { icon: '📅', label: 'Calendario', link: '/calendar' },
+    { icon: '📜', label: 'Storico', link: '/history' },
+    { icon: '📊', label: 'Statistiche', link: '/stats' },
+    { icon: '⋮', label: 'Altro', link: '/more' }
   ];
+
+  navigateTo(path: string) {
+    window.location.hash = path;
+  }
 }
