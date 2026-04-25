@@ -24,12 +24,10 @@ export class SupabaseService {
     this._user.next(session?.user ?? null);
   }
 
-  // Nuovo metodo per il login classico
   async signIn(email: string, password: string) {
     return await supabase.auth.signInWithPassword({ email, password });
   }
 
-  // Nuovo metodo per la registrazione
   async signUp(email: string, password: string) {
     return await supabase.auth.signUp({ email, password });
   }
