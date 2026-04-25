@@ -1,23 +1,21 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // Aggiunto FormsModule per ngModel
 import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } from 'date-fns';
 import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule], // Aggiunto FormsModule
   template: `
     <div class="history-page">
-      <!-- Titolo centrale -->
       <h1 class="title">Storico</h1>
       
-      <!-- Barra di ricerca -->
       <div class="search-container">
-        <input type="text" placeholder="Cerca..." (input)="onSearch($event.target.value)">
+        <input type="text" placeholder="Cerca..." (input)="onSearch((<HTMLInputElement>$event.target).value)">
       </div>
       
-      <!-- Filtri (mese/anno) -->
       <div class="filters">
         <select [(ngModel)]="selectedMonth" (change)="applyFilter()">
           <option value="">Mese</option>
@@ -29,7 +27,6 @@ import { SupabaseService } from '../../services/supabase.service';
         </select>
       </div>
       
-      <!-- Box scroll per ordini -->
       <div class="orders-container" [style.overflow-y]="'auto'">
         <div *ngFor="let order of filteredOrders" class="order-item">
           <div class="order-date">{{ order.date | date:'d/M/yyyy' }}</div>
