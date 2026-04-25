@@ -5,189 +5,119 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from './services/supabase.service';
 import { AuthComponent } from './components/auth/auth.component';
-import { 
-  Home, 
-  Wallet, 
-  Settings, 
-  TrendingUp, 
-  ShoppingCart, 
-  Utensils, 
-  Coffee, 
-  MoreVertical,
-  Trash2,
-  Plus
-} from 'lucide-angular';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, AuthComponent, FormsModule, Home, Wallet, Settings, TrendingUp, ShoppingCart, Utensils, Coffee, MoreVertical, Trash2, Plus],
+  imports: [CommonModule, AuthComponent, FormsModule],
   template: `
     <main>
       <ng-container *ngIf="supabase.user$ | async as user; else login">
-        <div class="app-shell">
-          <!-- Sidebar -->
-          <aside class="sidebar">
-            <div class="sidebar-header">
+        <div class="dashboard-container">
+          <!-- Header -->
+          <header class="dashboard-header">
+            <div class="logo-container">
               <div class="logo-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                  <path d="M2 17l10 5 10-5"/>
-                  <path d="M2 12l10 5 10-5"/>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10H4V10Z" />
+                  <path d="M9 10a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" />
+                  <path d="M9 14h6" />
+                  <path d="M9 18h6" />
                 </svg>
               </div>
               <h1>FoodMoney</h1>
             </div>
-            
-            <nav class="sidebar-nav">
-              <a href="#" class="nav-item active">
-                <app-home [size]="20"></app-home>
-                <span>Dashboard</span>
-              </a>
-              <a href="#" class="nav-item">
-                <app-wallet [size]="20"></app-wallet>
-                <span>Transazioni</span>
-              </a>
-              <a href="#" class="nav-item">
-                <app-trending-up [size]="20"></app-trending-up>
-                <span>Statistiche</span>
-              </a>
-              <a href="#" class="nav-item">
-                <app-settings [size]="20"></app-settings>
-                <span>Impostazioni</span>
-              </a>
-            </nav>
-
-            <div class="sidebar-footer">
-              <div class="user-profile">
-                <div class="avatar">{{ user.email?.charAt(0).toUpperCase() || 'U' }}</div>
-                <div class="user-info">
-                  <span class="user-name">{{ user.email?.split('@')[0] || 'Utente' }}</span>
-                  <span class="user-email">{{ user.email }}</span>
-                </div>
-                <button (click)="supabase.signOut()" class="logout-btn" title="Esci">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                  </svg>
-                </button>
-              </div>
+            <div class="user-info">
+              <span class="user-name">{{ user.email?.split('@')[0] || 'Utente' }}</span>
+              <button (click)="supabase.signOut()" class="logout-btn">Esci</button>
             </div>
-          </aside>
+          </header>
 
-          <!-- Main Content -->
-          <div class="main-content">
-            <!-- Header -->
-            <header class="content-header">
-              <div>
-                <h2>Dashboard</h2>
-                <p>Gestisci le tue spese in modo intelligente</p>
-              </div>
-              <div class="header-actions">
-                <span class="date-display">{{ today }}</span>
-              </div>
-            </header>
-
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-              <div class="stat-card primary">
-                <div class="stat-icon">
-                  <app-wallet [size]="24"></app-wallet>
-                </div>
-                <div class="stat-info">
-                  <span class="stat-label">Totale Speso</span>
-                  <span class="stat-value">€ {{ totalAmount.toFixed(2) }}</span>
-                </div>
-                <div class="stat-trend positive">
-                  <app-trending-up [size]="16"></app-trending-up>
-                  <span>{{ monthlyChange }}%</span>
-                </div>
-              </div>
-
-              <div class="stat-card">
-                <div class="stat-icon">
-                  <app-shopping-cart [size]="24"></app-shopping-cart>
-                </div>
-                <div class="stat-info">
-                  <span class="stat-label">Spese Totali</span>
-                  <span class="stat-value">{{ expenses.length }}</span>
-                </div>
-              </div>
-
-              <div class="stat-card">
-                <div class="stat-icon">
-                  <app-utensils [size]="24"></app-utensils>
-                </div>
-                <div class="stat-info">
-                  <span class="stat-label">Media per spesa</span>
-                  <span class="stat-value">€ {{ avgAmount.toFixed(2) }}</span>
-                </div>
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">💰</div>
+              <div class="stat-info">
+                <span class="stat-label">Totale Speso</span>
+                <span class="stat-value">€ {{ totalAmount.toFixed(2) }}</span>
               </div>
             </div>
 
-            <!-- Add Expense Card -->
-            <div class="add-expense-card">
-              <div class="card-header">
-                <h3><app-plus [size]="20"></app-plus> Nuova Spesa</h3>
+            <div class="stat-card">
+              <div class="stat-icon">🛒</div>
+              <div class="stat-info">
+                <span class="stat-label">Spese Totali</span>
+                <span class="stat-value">{{ expenses.length }}</span>
               </div>
-              <div class="form-grid">
-                <div class="input-group">
-                  <label>Importo (€)</label>
-                  <input type="number" [(ngModel)]="newAmount" placeholder="0.00" step="0.01" (keyup.enter)="saveExpense()">
-                </div>
-                <div class="input-group">
-                  <label>Categoria</label>
-                  <select [(ngModel)]="newCategory">
-                    <option *ngFor="let cat of categories" [value]="cat.name">
-                      {{ cat.emoji }} {{ cat.name }}
-                    </option>
-                  </select>
-                </div>
-                <div class="input-group full-width">
-                  <label>Descrizione</label>
-                  <input type="text" [(ngModel)]="newDesc" placeholder="Cosa hai comprato?" (keyup.enter)="saveExpense()">
-                </div>
-              </div>
-              <button (click)="saveExpense()" [disabled]="loading || !newAmount || !newDesc" class="save-btn">
-                <app-plus [size]="18"></app-plus>
-                {{ loading ? 'Aggiunta...' : 'Aggiungi Spesa' }}
-              </button>
             </div>
 
-            <!-- Error Banner -->
-            <div *ngIf="errorMessage" class="error-banner">
-              {{ errorMessage }}
+            <div class="stat-card">
+              <div class="stat-icon">🍽️</div>
+              <div class="stat-info">
+                <span class="stat-label">Media per spesa</span>
+                <span class="stat-value">€ {{ avgAmount.toFixed(2) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Expense Card -->
+          <div class="add-expense-card">
+            <div class="card-header">
+              <h3>Aggiungi Nuova Spesa</h3>
+            </div>
+            <div class="form-grid">
+              <div class="input-group">
+                <label>Importo (€)</label>
+                <input type="number" [(ngModel)]="newAmount" placeholder="0.00" step="0.01" (keyup.enter)="saveExpense()">
+              </div>
+              <div class="input-group">
+                <label>Categoria</label>
+                <select [(ngModel)]="newCategory">
+                  <option *ngFor="let cat of categories" [value]="cat.name">
+                    {{ cat.emoji }} {{ cat.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="input-group full-width">
+                <label>Descrizione</label>
+                <input type="text" [(ngModel)]="newDesc" placeholder="Cosa hai comprato?" (keyup.enter)="saveExpense()">
+              </div>
+            </div>
+            <button (click)="saveExpense()" [disabled]="loading || !newAmount || !newDesc" class="save-btn">
+              {{ loading ? 'Aggiunta...' : 'Aggiungi Spesa' }}
+            </button>
+          </div>
+
+          <!-- Error Banner -->
+          <div *ngIf="errorMessage" class="error-banner">
+            {{ errorMessage }}
+          </div>
+
+          <!-- Recent Expenses -->
+          <div class="expenses-section">
+            <div class="section-header">
+              <h3>Spese Recenti</h3>
+              <span class="count">{{ expenses.length }} totali</span>
             </div>
 
-            <!-- Recent Expenses -->
-            <div class="expenses-section">
-              <div class="section-header">
-                <h3>Spese Recenti</h3>
-                <span class="count">{{ expenses.length }} totali</span>
-              </div>
+            <div *ngIf="expenses.length === 0 && !loading" class="empty-state">
+              <div class="empty-icon">🍽️</div>
+              <p>Nessuna spesa registrata oggi</p>
+              <p class="empty-sub">Aggiungi la tua prima spesa per iniziare</p>
+            </div>
 
-              <div *ngIf="expenses.length === 0 && !loading" class="empty-state">
-                <div class="empty-icon">🍽️</div>
-                <p>Nessuna spesa registrata oggi</p>
-                <p class="empty-sub">Aggiungi la tua prima spesa per iniziare</p>
-              </div>
-
-              <div class="expenses-list">
-                <div *ngFor="let exp of expenses" class="expense-item">
-                  <div class="exp-icon" [style.background]="getCategoryColor(exp.category)">
-                    {{ getCategoryEmoji(exp.category) }}
-                  </div>
-                  <div class="exp-details">
-                    <span class="exp-title">{{ exp.description }}</span>
-                    <span class="exp-meta">{{ exp.category }} • {{ exp.created_at | date:'dd/MM HH:mm' }}</span>
-                  </div>
-                  <div class="exp-right">
-                    <span class="exp-amount">€ {{ exp.amount.toFixed(2) }}</span>
-                    <button (click)="deleteExpense(exp.id)" class="delete-btn" title="Elimina">
-                      <app-trash2 [size]="16"></app-trash2>
-                    </button>
-                  </div>
+            <div class="expenses-list">
+              <div *ngFor="let exp of expenses" class="expense-item">
+                <div class="exp-icon" [style.background]="getCategoryColor(exp.category)">
+                  {{ getCategoryEmoji(exp.category) }}
+                </div>
+                <div class="exp-details">
+                  <span class="exp-title">{{ exp.description }}</span>
+                  <span class="exp-meta">{{ exp.category }} • {{ exp.created_at | date:'dd/MM HH:mm' }}</span>
+                </div>
+                <div class="exp-right">
+                  <span class="exp-amount">€ {{ exp.amount.toFixed(2) }}</span>
+                  <button (click)="deleteExpense(exp.id)" class="delete-btn" title="Elimina">🗑️</button>
                 </div>
               </div>
             </div>
@@ -202,12 +132,11 @@ import {
   `,
   styles: [`
     :host {
-      --bg-dark: #0a0a0f;
-      --bg-card: #141419;
-      --bg-elevated: #1a1a24;
-      --border: #2a2a3a;
-      --text: #f0f0f0;
-      --text-muted: #8a8a9a;
+      --bg-white: #ffffff;
+      --bg-card: #f8f9fa;
+      --border: #e9ecef;
+      --text: #212529;
+      --text-muted: #6c757d;
       --accent: #f97316;
       --accent-hover: #ea580c;
       --positive: #10b981;
@@ -216,166 +145,68 @@ import {
 
     main {
       min-height: 100vh;
-      background: var(--bg-dark);
+      background: var(--bg-white);
       color: var(--text);
       font-family: 'Inter', system-ui, sans-serif;
     }
 
-    /* App Shell Layout */
-    .app-shell {
-      display: flex;
-      min-height: 100vh;
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
     }
 
-    /* Sidebar */
-    .sidebar {
-      width: 260px;
-      background: var(--bg-card);
-      border-right: 1px solid var(--border);
+    .dashboard-header {
       display: flex;
-      flex-direction: column;
-      padding: 1.5rem;
-      position: fixed;
-      height: 100vh;
-      left: 0;
-      top: 0;
-      z-index: 100;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
     }
 
-    .sidebar-header {
+    .logo-container {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 2.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
+      gap: 1rem;
     }
 
     .logo-icon {
       color: var(--accent);
     }
 
-    .sidebar-header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
+    .dashboard-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
       letter-spacing: -0.02em;
-    }
-
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      flex: 1;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.875rem 1rem;
-      border-radius: 0.75rem;
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: all 0.2s;
-      font-weight: 500;
-    }
-
-    .nav-item:hover {
-      background: var(--bg-elevated);
       color: var(--text);
     }
 
-    .nav-item.active {
-      background: var(--accent);
-      color: white;
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border);
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, var(--accent), #fb923c);
-      border-radius: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 1.1rem;
-    }
-
     .user-info {
-      flex: 1;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
     }
 
     .user-name {
       font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .user-email {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 1.1rem;
     }
 
     .logout-btn {
-      background: none;
+      background: var(--accent);
+      color: white;
       border: none;
-      color: var(--text-muted);
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
       cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
       transition: all 0.2s;
     }
 
     .logout-btn:hover {
-      background: var(--bg-elevated);
-      color: var(--danger);
-    }
-
-    /* Main Content */
-    .main-content {
-      margin-left: 260px;
-      padding: 2rem;
-      width: calc(100% - 260px);
-    }
-
-    .content-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 2rem;
-    }
-
-    .content-header h2 {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.25rem;
-    }
-
-    .content-header p {
-      color: var(--text-muted);
-    }
-
-    .date-display {
-      color: var(--text-muted);
-      font-size: 0.9rem;
+      background: var(--accent-hover);
+      transform: translateY(-1px);
     }
 
     /* Stats Grid */
@@ -383,48 +214,36 @@ import {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
 
     .stat-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1.5rem;
+      border-radius: 1.5rem;
+      padding: 2rem;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 1.5rem;
       transition: all 0.2s;
     }
 
     .stat-card:hover {
       border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .stat-card.primary {
-      background: linear-gradient(135deg, var(--accent), #fb923c);
-      border-color: var(--accent);
-    }
-
-    .stat-card.primary .stat-label,
-    .stat-card.primary .stat-icon {
-      color: rgba(255,255,255,0.8);
-    }
-
-    .stat-card.primary .stat-value {
-      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     }
 
     .stat-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--bg-elevated);
-      border-radius: 0.75rem;
+      width: 64px;
+      height: 64px;
+      background: white;
+      border-radius: 1.25rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--accent);
+      font-size: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
     .stat-info {
@@ -435,55 +254,41 @@ import {
       display: block;
       font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
     }
 
     .stat-value {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 2.25rem;
+      font-weight: 800;
       color: var(--text);
+      line-height: 1.1;
     }
-
-    .stat-trend {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    .stat-trend.positive { color: var(--positive); }
-    .stat-trend.negative { color: var(--danger); }
 
     /* Add Expense Card */
     .add-expense-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
     }
 
     .card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .card-header h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
     }
 
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 2fr;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .full-width {
@@ -493,11 +298,11 @@ import {
     .input-group {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
 
     .input-group label {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -506,12 +311,12 @@ import {
 
     .input-group input,
     .input-group select {
-      padding: 0.875rem 1rem;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 1rem;
       color: var(--text);
-      font-size: 1rem;
+      font-size: 1.1rem;
       outline: none;
       transition: all 0.2s;
     }
@@ -519,7 +324,7 @@ import {
     .input-group input:focus,
     .input-group select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
 
     .save-btn {
@@ -527,21 +332,22 @@ import {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      padding: 1rem;
+      gap: 0.75rem;
+      padding: 1.25rem;
       background: var(--accent);
       color: white;
       border: none;
-      border-radius: 0.75rem;
-      font-weight: 600;
-      font-size: 1rem;
+      border-radius: 1rem;
+      font-weight: 700;
+      font-size: 1.1rem;
       cursor: pointer;
       transition: all 0.2s;
     }
 
     .save-btn:hover:not(:disabled) {
       background: var(--accent-hover);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.3);
     }
 
     .save-btn:disabled {
@@ -553,18 +359,19 @@ import {
     .error-banner {
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      padding: 1rem;
-      border-radius: 0.75rem;
-      margin-bottom: 2rem;
+      color: #dc2626;
+      padding: 1.25rem;
+      border-radius: 1rem;
+      margin-bottom: 2.5rem;
       text-align: center;
+      font-weight: 600;
     }
 
     /* Expenses Section */
     .expenses-section {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 1rem;
+      border-radius: 1.5rem;
       overflow: hidden;
     }
 
@@ -572,38 +379,41 @@ import {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.5rem;
+      padding: 2rem;
       border-bottom: 1px solid var(--border);
     }
 
     .section-header h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
     }
 
     .count {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      background: var(--bg-elevated);
-      padding: 0.25rem 0.75rem;
+      background: white;
+      padding: 0.5rem 1rem;
       border-radius: 1rem;
+      border: 1px solid var(--border);
     }
 
     .empty-state {
       text-align: center;
-      padding: 3rem 2rem;
+      padding: 4rem 2rem;
       color: var(--text-muted);
     }
 
     .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.5;
     }
 
     .empty-sub {
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-      opacity: 0.6;
+      font-size: 1rem;
+      margin-top: 1rem;
+      opacity: 0.7;
     }
 
     .expenses-list {
@@ -614,14 +424,14 @@ import {
     .expense-item {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 1.25rem 1.5rem;
+      gap: 1.25rem;
+      padding: 1.5rem 2rem;
       border-bottom: 1px solid var(--border);
       transition: all 0.2s;
     }
 
     .expense-item:hover {
-      background: var(--bg-elevated);
+      background: white;
     }
 
     .expense-item:last-child {
@@ -629,13 +439,13 @@ import {
     }
 
     .exp-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 0.75rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 1.25rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.5rem;
       flex-shrink: 0;
     }
 
@@ -643,28 +453,29 @@ import {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.35rem;
     }
 
     .exp-title {
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1.1rem;
       color: var(--text);
     }
 
     .exp-meta {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
     }
 
     .exp-right {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 1.5rem;
     }
 
     .exp-amount {
-      font-weight: 700;
-      font-size: 1.1rem;
+      font-weight: 800;
+      font-size: 1.25rem;
       color: var(--text);
     }
 
@@ -673,10 +484,11 @@ import {
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
+      padding: 0.75rem;
+      border-radius: 0.75rem;
       transition: all 0.2s;
       opacity: 0;
+      font-size: 1.25rem;
     }
 
     .expense-item:hover .delete-btn {
@@ -690,32 +502,24 @@ import {
 
     /* Scrollbar */
     .expenses-list::-webkit-scrollbar {
-      width: 6px;
+      width: 8px;
     }
 
     .expenses-list::-webkit-scrollbar-track {
-      background: var(--bg-dark);
+      background: var(--bg-card);
     }
 
     .expenses-list::-webkit-scrollbar-thumb {
       background: var(--border);
-      border-radius: 3px;
+      border-radius: 4px;
     }
 
     /* Responsive */
     @media (max-width: 1024px) {
-      .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s;
-      }
-      
-      .sidebar.open {
-        transform: translateX(0);
-      }
-      
-      .main-content {
-        margin-left: 0;
-        width: 100%;
+      .dashboard-header {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
       }
       
       .stats-grid {
@@ -736,7 +540,7 @@ export class AppComponent implements OnInit {
   supabase = inject(SupabaseService);
   expenses: any[] = [];
   totalAmount = 0;
-  monthlyChange = 12.5; // Dato fittizio per il trend
+  monthlyChange = 12.5;
   avgAmount = 0;
   
   newAmount: number | null = null;
