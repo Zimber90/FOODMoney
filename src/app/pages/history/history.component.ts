@@ -21,7 +21,7 @@ import { SupabaseService } from '../../services/supabase.service';
         >
       </div>
 
-      <!-- Rettangolo arrotondato con sfondo colorato per la lista ordini -->
+      <!-- Lista ordini -->
       <div class="orders-rectangle">
         <div *ngIf="filteredOrders.length === 0" class="empty-state">
           Nessun ordine trovato
@@ -34,15 +34,69 @@ import { SupabaseService } from '../../services/supabase.service';
           </div>
           <div class="order-amount">€ {{ order.amount | number:'1.2-2' }}</div>
           
-          <!-- Icona di modifica -->
-          <span class="edit-icon" (click)="editOrder(order)" title="Modifica ordine">
+          <!-- Icona modifica -->
+          <span class="edit-icon" (click)="openEditPopup(order)" title="Modifica ordine">
             ✏️
           </span>
           
-          <!-- Icona di eliminazione -->
+          <!-- Icona elimina -->
           <span class="delete-icon" (click)="deleteOrder(order.id)" title="Elimina ordine">
             🗑️
           </span>
+        </div>
+      </div>
+
+      <!-- Popup modifica ordine -->
+      <div *ngIf="isEditPopupOpen" class="popup-overlay" (click)="closeEditPopup()">
+        <div class="popup-modal" (click)="$event.stopPropagation()">
+          <h2 class="popup-title">Modifica Ordine</h2>
+          
+          <form (ngSubmit)="saveEditedOrder()" #editFormRef="ngForm">
+            <div class="form-group">
+              <label for="edit-ristorante">Ristorante</label>
+              <input 
+                type="text" 
+                id="edit-ristorante" 
+                name="ristorante" 
+                [(ngModel)]="editForm.ristorante" 
+                required 
+                class="form-input"
+                placeholder="Nome ristorante"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="edit-data">Data</label>
+              <input 
+                type="date" 
+                id="edit-data" 
+                name="data" 
+                [(ngModel)]="editForm.data" 
+                required 
+                class="form-input"
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="edit-importo">Importo</label>
+              <input 
+                type="number" 
+                id="edit-importo" 
+                name="importo" 
+                [(ngModel)]="editForm.importo" 
+                required 
+                min="0" 
+                step="0.01" 
+                class="form-input"
+                placeholder="0.00"
+              >
+            </div>
+            
+            <div class="popup-actions">
+              <button type="button" class="btn-close" (click)="closeEditPopup()">Chiudi</button>
+              <button type="submit" class="btn-save">Salva Modifiche</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -139,7 +193,6 @@ import { SupabaseService } from '../../services/supabase.service';
       font-size: 0.95rem;
     }
 
-    /* Stile per le icone */
     .edit-icon, .delete-icon {
       font-size: 1.2rem;
       color: #f97316;
@@ -150,6 +203,103 @@ import { SupabaseService } from '../../services/supabase.service';
 
     .edit-icon:hover, .delete-icon:hover {
       color: #ea580c;
+    }
+
+    /* Stile popup coerente con le altre pagine */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 102;
+    }
+
+    .popup-modal {
+      background: white;
+      border-radius: 2rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .popup-title {
+      text-align: center;
+      color: #9a3412;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #9a3412;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      margin-left: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #fed7aa;
+      border-radius: 1rem;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+      background: #fffcf9;
+    }
+    .form-input:focus {
+      border-color: #f97316;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    .popup-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      gap: 1rem;
+    }
+
+    .btn-close {
+      flex: 1;
+      padding: 1rem;
+      background: #f0f0f0;
+      color: #666;
+      border: none;
+      border-radius: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-close:hover { background: #e0e0e0; }
+
+    .btn-save {
+      flex: 1;
+      padding: 1rem;
+      background: #f97316;
+      color: white;
+      border: none;
+      border-radius: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-save:hover {
+      background: #ea580c;
+      transform: translateY(-2px);
     }
 
     @media (max-width: 768px) {
@@ -163,6 +313,11 @@ export class HistoryComponent {
   private supabase = inject(SupabaseService);
   orders: any[] = [];
   filteredOrders: any[] = [];
+  
+  // Stato popup modifica
+  isEditPopupOpen = false;
+  editingOrder: any = null;
+  editForm = { ristorante: '', data: '', importo: 0 };
 
   constructor() {
     this.loadOrders();
@@ -190,13 +345,63 @@ export class HistoryComponent {
     });
   }
 
-  // Placeholder per la modifica dell'ordine
-  editOrder(order: any) {
-    console.log('Modifica ordine:', order);
-    // Qui potrai implementare la logica per modificare i dettagli
+  // Apre popup modifica con dati pre-compilati
+  openEditPopup(order: any) {
+    this.editingOrder = order;
+    this.editForm = {
+      ristorante: order.description,
+      importo: order.amount,
+      data: new Date(order.created_at).toISOString().split('T')[0] // Formato YYYY-MM-DD per input date
+    };
+    this.isEditPopupOpen = true;
   }
 
-  // Eliminazione ordine
+  // Chiude popup modifica
+  closeEditPopup() {
+    this.isEditPopupOpen = false;
+    this.editingOrder = null;
+    this.editForm = { ristorante: '', data: '', importo: 0 };
+  }
+
+  // Salva modifiche ordine
+  async saveEditedOrder() {
+    if (!this.editingOrder || !this.editForm.ristorante || !this.editForm.data || !this.editForm.importo) {
+      return;
+    }
+
+    try {
+      const { error } = await this.supabase.updateExpense(
+        this.editingOrder.id,
+        this.editForm.importo,
+        this.editForm.ristorante,
+        'Ristorante',
+        this.editForm.data
+      );
+
+      if (error) {
+        console.error('Errore salvataggio modifiche:', error);
+        return;
+      }
+
+      // Aggiorna lista locale
+      const index = this.orders.findIndex(o => o.id === this.editingOrder.id);
+      if (index !== -1) {
+        this.orders[index] = {
+          ...this.orders[index],
+          description: this.editForm.ristorante,
+          amount: this.editForm.importo,
+          created_at: this.editForm.data
+        };
+        this.filteredOrders = [...this.orders];
+      }
+
+      this.closeEditPopup();
+    } catch (error) {
+      console.error('Errore salvataggio modifiche:', error);
+    }
+  }
+
+  // Elimina ordine
   deleteOrder(id: string) {
     this.supabase.deleteExpense(id).then(() => {
       this.orders = this.orders.filter(o => o.id !== id);

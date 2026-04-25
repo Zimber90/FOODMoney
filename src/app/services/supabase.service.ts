@@ -61,8 +61,28 @@ export class SupabaseService {
         description, 
         category,
         user_id: user.id,
-        created_at: expenseDate || null // Cambiato da 'expense_date' a 'created_at'
+        created_at: expenseDate || null
       }])
+      .select();
+    
+    if (error) throw error;
+    return { data, error: null };
+  }
+
+  async updateExpense(id: string, amount: number, description: string, category: string, expenseDate?: string) {
+    const user = this._user.value;
+    if (!user) throw new Error('Utente non autenticato');
+    
+    const { data, error } = await supabase
+      .from('expenses')
+      .update({ 
+        amount, 
+        description, 
+        category,
+        created_at: expenseDate || null 
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
       .select();
     
     if (error) throw error;
