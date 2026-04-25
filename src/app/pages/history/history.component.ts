@@ -2,12 +2,12 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
-import { LucidePencil, LucideTrash } from '@supabase/ui'; // Importa gli iconi Lucide
+import { LucidePencil, LucideTrash } from 'lucide-angular'; // Import corretto da lucide-angular
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucidePencil, LucideTrash], // Registrazione icone
   template: `
     <div class="history-page">
       <h1 class="title">Storico</h1>
@@ -35,14 +35,14 @@ import { LucidePencil, LucideTrash } from '@supabase/ui'; // Importa gli iconi L
           </div>
           <div class="order-amount">€ {{ order.amount | number:'1.2-2' }}</div>
           
-          <!-- Icone di modifica -->
+          <!-- Icona di modifica -->
           <lucide-pencil 
             class="edit-icon" 
             (click)="editOrder(order)" 
             style="margin-left: 1rem; cursor: pointer;"
           ></lucide-pencil>
           
-          <!-- Icone di eliminazione -->
+          <!-- Icona di eliminazione -->
           <lucide-trash 
             class="delete-icon" 
             (click)="deleteOrder(order.id)" 
@@ -92,7 +92,6 @@ import { LucidePencil, LucideTrash } from '@supabase/ui'; // Importa gli iconi L
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
 
-    /* Stile per il rettangolo arrotondato con lista ordini */
     .orders-rectangle {
       background-color: #fff7ed;
       border-radius: 2rem;
@@ -145,7 +144,6 @@ import { LucidePencil, LucideTrash } from '@supabase/ui'; // Importa gli iconi L
       font-size: 0.95rem;
     }
 
-    /* Stile per le icone */
     .edit-icon, .delete-icon {
       font-size: 1.2rem;
       color: #f97316;
@@ -194,17 +192,15 @@ export class HistoryComponent {
     });
   }
 
-  // Funzione per modificare un ordine
+  // Placeholder per la modifica dell'ordine
   editOrder(order: any) {
-    // Qui puoi implementare la logica per modificare l'ordine
-    // Esempio: apri un form per modificare i dettagli
     console.log('Modifica ordine:', order);
+    // Qui potrai aprire un modal o un form per modificare i dati
   }
 
-  // Funzione per eliminare un ordine
+  // Eliminazione ordine
   deleteOrder(id: string) {
     this.supabase.deleteExpense(id).then(() => {
-      // Rimuovi l'ordine dalla lista
       this.orders = this.orders.filter(o => o.id !== id);
       this.filteredOrders = [...this.orders];
     });
