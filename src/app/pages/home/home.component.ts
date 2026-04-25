@@ -24,7 +24,7 @@ import { SupabaseService } from '../../services/supabase.service';
       </button>
     </div>
 
-    <!-- Popup creazione ordine -->
+    <!-- Order creation popup -->
     <div *ngIf="isOrderPopupOpen" class="popup-overlay" (click)="closeOrderPopup()">
       <div class="popup-modal" (click)="$event.stopPropagation()">
         <h2 class="popup-title">Crea Ordine</h2>
@@ -32,11 +32,11 @@ import { SupabaseService } from '../../services/supabase.service';
         <form (ngSubmit)="saveOrder()" #orderFormRef="ngForm">
           <div class="form-group">
             <label for="ristorante">Ristorante</label>
-            <select 
-              id="ristorante" 
-              name="ristorante" 
-              [(ngModel)]="orderForm.restaurantId" 
-              required 
+            <select
+              id="ristorante"
+              name="ristorante"
+              [(ngModel)]="orderForm.restaurantId"
+              required
               class="form-input"
               (change)="onRestaurantSelect()"
             >
@@ -57,29 +57,29 @@ import { SupabaseService } from '../../services/supabase.service';
           
           <div class="form-group">
             <label for="data">Data</label>
-            <input 
-              type="date" 
-              id="data" 
-              name="data" 
-              [(ngModel)]="orderForm.data" 
-              required 
+            <input
+              type="date"
+              id="data"
+              name="data"
+              [(ngModel)]="orderForm.data"
+              required
               class="form-input"
-            >
+            />
           </div>
           
           <div class="form-group">
             <label for="importo">Importo</label>
-            <input 
-              type="number" 
-              id="importo" 
-              name="importo" 
-              [(ngModel)]="orderForm.importo" 
-              required 
-              min="0" 
-              step="0.01" 
+            <input
+              type="number"
+              id="importo"
+              name="importo"
+              [(ngModel)]="orderForm.importo"
+              required
+              min="0"
+              step="0.01"
               class="form-input"
               placeholder="0.00"
-            >
+            />
           </div>
           
           <div class="popup-actions">
@@ -104,7 +104,7 @@ import { SupabaseService } from '../../services/supabase.service';
       width: 300px;
       height: 300px;
       color: #f97316;
-      filter: drop-shadow(0 10px 15px rgba(249, 115, 22, 0.2));
+      filter: drop-shadow(0 10px 15px rgba(249,115,22,0.2));
       transition: transform 0.3s ease;
     }
     .sandwich-icon:hover { transform: scale(1.05); }
@@ -126,16 +126,13 @@ import { SupabaseService } from '../../services/supabase.service';
     .create-btn:hover {
       background: #ea580c;
       transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+      box-shadow: 0 10px 15px -3px rgba(249,115,22,0.3);
     }
 
     .popup-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -148,7 +145,7 @@ import { SupabaseService } from '../../services/supabase.service';
       padding: 2rem;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     }
 
     .popup-title {
@@ -184,7 +181,7 @@ import { SupabaseService } from '../../services/supabase.service';
     .form-input:focus {
       border-color: #f97316;
       background: white;
-      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+      box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
     }
 
     .selected-color {
@@ -274,7 +271,11 @@ export class HomeComponent implements OnInit {
 
   openOrderPopup() {
     this.isOrderPopupOpen = true;
-    this.orderForm = { restaurantId: '', data: new Date().toISOString().split('T')[0], importo: 0 };
+    this.orderForm = {
+      restaurantId: '',
+      data: new Date().toISOString().split('T')[0],
+      importo: 0
+    };
     this.selectedRestaurantColor = '';
   }
 

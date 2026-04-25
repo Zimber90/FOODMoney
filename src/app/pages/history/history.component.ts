@@ -230,11 +230,8 @@ import { SupabaseService } from '../../services/supabase.service';
 
     .popup-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -247,7 +244,7 @@ import { SupabaseService } from '../../services/supabase.service';
       padding: 2rem;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     }
 
     .popup-title {
@@ -285,7 +282,7 @@ import { SupabaseService } from '../../services/supabase.service';
     .form-input:focus {
       border-color: #f97316;
       background: white;
-      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+      box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
     }
 
     .selected-color {

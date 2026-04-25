@@ -11,7 +11,7 @@ import { supabase } from '../../integrations/supabase/client';
 export class SupabaseService {
   private _user = new BehaviorSubject<User | null>(null);
   user$ = this._user.asObservable();
-  
+
   constructor() {
     supabase.auth.onAuthStateChange((_event, session) => {
       this._user.next(session?.user ?? null);
@@ -24,6 +24,7 @@ export class SupabaseService {
     this._user.next(session?.user ?? null);
   }
 
+  // ── Auth ─────────────────────────────────────────────────────────────────────
   async signIn(email: string, password: string) {
     return await supabase.auth.signInWithPassword({ email, password });
   }
@@ -36,13 +37,14 @@ export class SupabaseService {
     return await supabase.auth.signOut();
   }
 
+  // ── Expenses ───────────────────────────────────────────────────────────────
   async getExpenses() {
     try {
       const { data, error } = await supabase
         .from('expenses')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: any) {
@@ -50,35 +52,48 @@ export class SupabaseService {
     }
   }
 
-  async addExpense(amount: number, description: string, category: string, expenseDate?: string, restaurantColor?: string) {
+  async addExpense(
+    amount: number,
+    description: string,
+    category: string,
+    expenseDate?: string,
+    restaurantColor?: string
+  ) {
     const user = this._user.value;
     if (!user) throw new Error('Utente non autenticato');
-    
+
     const { data, error } = await supabase
       .from('expenses')
-      .insert([{ 
-        amount, 
-        description, 
+      .insert([{
+        amount,
+        description,
         category,
         user_id: user.id,
         created_at: expenseDate || null,
         restaurant_color: restaurantColor || '#f97316'
       }])
       .select();
-    
+
     if (error) throw error;
     return { data, error: null };
   }
 
-  async updateExpense(id: string, amount: number, description: string, category: string, expenseDate?: string, restaurantColor?: string) {
+  async updateExpense(
+    id: string,
+    amount: number,
+    description: string,
+    category: string,
+    expenseDate?: string,
+    restaurantColor?: string
+  ) {
     const user = this._user.value;
     if (!user) throw new Error('Utente non autenticato');
-    
+
     const { data, error } = await supabase
       .from('expenses')
-      .update({ 
-        amount, 
-        description, 
+      .update({
+        amount,
+        description,
         category,
         created_at: expenseDate || null,
         restaurant_color: restaurantColor || '#f97316'
@@ -86,7 +101,7 @@ export class SupabaseService {
       .eq('id', id)
       .eq('user_id', user.id)
       .select();
-    
+
     if (error) throw error;
     return { data, error: null };
   }
@@ -96,7 +111,60 @@ export class SupabaseService {
       .from('expenses')
       .delete()
       .eq('id', id);
-    
+
+    if (error) throw error;
+    return { error: null };
+  }
+
+  // ── Restaurants ─────────────────────────────────────────────────────────────
+  async getRestaurants() {
+    try {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error: any) {
+      return { data: [], error };
+    }
+  }
+
+  async addRestaurant(name: string, color: string) {
+    const user = this._user.value;
+    if (!user) throw new Error('Utente non autenticato');
+
+    const { data, error } = await supabase
+      .from('restaurants')
+      .insert([{ name, color, user_id: user.id }])
+      .select();
+
+    if (error) throw error;
+    return { data, error: null };
+  }
+
+  async updateRestaurant(id: string, name: string, color: string) {
+    const user = this._user.value;
+    if (!user) throw new Error('Utente non autenticato');
+
+    const { data, error } = await supabase
+      .from('restaurants')
+      .update({ name, color })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select();
+
+    if (error) throw error;
+    return { data, error: null };
+  }
+
+  async deleteRestaurant(id: string) {
+    const { error } = await supabase
+      .from('restaurants')
+      .delete()
+      .eq('id', id);
+
     if (error) throw error;
     return { error: null };
   }

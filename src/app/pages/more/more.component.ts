@@ -16,29 +16,29 @@ import { SupabaseService } from '../../services/supabase.service';
         <h2 class="section-title">Gestione Ristoranti</h2>
         <p class="section-subtitle">Salva i tuoi ristoranti preferiti con il loro colore identificativo</p>
 
-        <!-- Add/Edit Restaurant Form -->
+        <!-- Add / Edit Form -->
         <div class="restaurant-form">
           <div class="form-group">
             <label for="rest-name">Nome Ristorante</label>
-            <input 
-              type="text" 
-              id="rest-name" 
-              [(ngModel)]="restForm.name" 
+            <input
+              type="text"
+              id="rest-name"
+              [(ngModel)]="restForm.name"
               placeholder="Es. GG, McDonald's"
               class="form-input"
               required
-            >
+            />
           </div>
 
           <div class="form-group">
             <label for="rest-color">Colore Identificativo</label>
             <div class="color-picker-wrapper">
-              <input 
-                type="color" 
-                id="rest-color" 
-                [(ngModel)]="restForm.color" 
+              <input
+                type="color"
+                id="rest-color"
+                [(ngModel)]="restForm.color"
                 class="form-input color-picker"
-              >
+              />
               <span class="color-preview" [style.background-color]="restForm.color"></span>
             </div>
           </div>
@@ -53,7 +53,7 @@ import { SupabaseService } from '../../services/supabase.service';
           </div>
         </div>
 
-        <!-- Restaurants List -->
+        <!-- List of Saved Restaurants -->
         <div class="restaurants-list">
           @if (restaurants.length === 0) {
             <div class="empty-state">Nessun ristorante salvato. Aggiungine uno sopra!</div>
@@ -99,7 +99,7 @@ import { SupabaseService } from '../../services/supabase.service';
       background: white;
       border-radius: 2rem;
       padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
+      box-shadow: 0 4px 6px -1px rgba(249,115,22,0.1);
       margin-bottom: 2rem;
     }
 
@@ -149,7 +149,7 @@ import { SupabaseService } from '../../services/supabase.service';
     .form-input:focus {
       border-color: #f97316;
       background: white;
-      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+      box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
     }
 
     .color-picker-wrapper {

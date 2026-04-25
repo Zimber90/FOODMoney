@@ -23,9 +23,337 @@ import { SupabaseService } from '../../services/supabase.service';
           </div>
 
           <div *ngFor="let week of calendarWeeks" class="week-row">
-            <div 
-              *ngFor="let day of week" 
-              class="day-cell" 
+            <div
+              *ngFor="let day of week"
+              class="day-cell"
+              [class.today]="isToday(day.date)"
+              [class.other-month]="isOtherMonth(day.date)"
+              [style.background-color]="getDayColor(day.date)"
+              [style.color]="getDayTextColor(day.date)"
+            >
+              {{ day.date | date:'d' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="fab" (click)="openOrderPopup()">
+        <span class="fab-icon">+</span>
+      </button>
+
+      <!-- Order creation popup -->
+      <div *ngIf="isOrderPopupOpen" class="popup-overlay" (click)="closeOrderPopup()">
+        <div class="popup-modal" (click)="$event.stopPropagation()">
+          <h2 class="popup-title">Crea Ordine</h2>
+          
+          <form (ngSubmit)="saveOrder()" #orderFormRef="ngForm">
+            <div class="form-group">
+              <label for="ristorante">Ristorante</label>
+              <select
+                id="ristorante"
+                name="ristorante"
+                [(ngModel)]="orderForm.restaurantId"
+                required
+                class="form-input"
+                (change)="onRestaurantSelect()"
+              >
+                <option value="" disabled>Scegli un ristorante</option>
+                @for (restaurant of restaurants; track restaurant.id) {
+                  <option [value]="restaurant.id">
+                    {{ restaurant.name }}
+                  </option>
+                }
+              </select>
+              @if (selectedRestaurantColor) {
+                <div class="selected-color">
+                  <span class="color-swatch" [style.background-color]="selectedRestaurantColor"></span>
+                  <span>Colore: {{ selectedRestaurantColor }}</span>
+                </div>
+              }
+            </div>
+            
+            <div class="form-group">
+              <label for="data">Data</label>
+              <input
+                type="date"
+                id="data"
+                name="data"
+                [(ngModel)]="orderForm.data"
+                required
+                class="form-input"
+              />
+            </div>
+            
+            <div class="form-group">
+              <label for="importo">Importo</label>
+              <input
+                type="number"
+                id="importo"
+                name="importo"
+                [(ngModel)]="orderForm.importo"
+                required
+                min="0"
+                step="0.01"
+                class="form-input"
+                placeholder="0.00"
+              />
+            </div>
+            
+            <div class="popup-actions">
+              <button type="button" class="btn-close" (click)="closeOrderPopup()">Chiudi</button>
+              <button type="submit" class="btn-save">Salva Ordine</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .calendar-page {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 80px);
+      background: #fff7ed;
+      position: relative;
+    }
+
+    .calendar-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: white;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: #16a34a;
+      padding: 0.5rem 1rem;
+      border-radius: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: #f0fdf4;
+    }
+
+    .calendar-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #166534;
+      text-transform: capitalize;
+    }
+
+    .calendar-container {
+      background: white;
+      padding: 1.5rem;
+      flex: 1;
+    }
+
+    .calendar-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .weekdays-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .weekday-cell {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #166534;
+      text-transform: uppercase;
+      padding: 0.5rem 0;
+    }
+
+    .week-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+    }
+
+    .day-cell {
+      text-align: center;
+      padding: 0.75rem 0;
+      border-radius: 1rem;
+      font-size: 0.95rem;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .day-cell:hover:not(.other-month) {
+      background: #f0fdf4;
+    }
+
+    .day-cell.today {
+      background-color: #f97316;
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 4px 6px -1px rgba(249,115,22,0.2);
+    }
+
+    .day-cell.other-month {
+      color: #ccc;
+      cursor: default;
+      background-color: transparent !important;
+    }
+
+    .fab {
+      position: fixed;
+      bottom: 100px;
+      right: 1.5rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: #f97316;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(249,115,22,0.3);
+      transition: all 0.2s;
+      z-index: 101;
+    }
+
+    .fab:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(249,115,22,0.3);
+    }
+
+    .fab-icon {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 102;
+    }
+
+    .popup-modal {
+      background: white;
+      border-radius: 2rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    .popup-title {
+      text-align: center;
+      color: #9a3412;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #9a3412;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      margin-left: 0.5rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #fed7aa;
+      border-radius: 1rem;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+      background: #fffcf9;
+    }
+
+    .form-input:focus {
+      border-color: #f97316;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
+    }
+
+    .selected-color {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #9a3412;
+      margin-left: 0.5rem;
+    }
+
+    .color-swatch {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .popup-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      gap: 1rem;
+    }
+
+    .btn-close {
+      flex: 1;
+      padding: 1rem;
+<dyad-write path="src/app/pages/calendar/calendar.component.ts" description="Complete CalendarComponent with restaurant dropdown and saved colors">
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { format, startOfMonth, endOfMonth, isToday, getDay, getMonth, getYear } from 'date-fns';
+import { SupabaseService } from '../../services/supabase.service';
+
+@Component({
+  selector: 'app-calendar',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="calendar-page">
+      <div class="calendar-nav">
+        <button (click)="prevMonth()" class="nav-btn">◀</button>
+        <div class="calendar-title">{{ currentMonth }} {{ currentYear }}</div>
+        <button (click)="nextMonth()" class="nav-btn">▶</button>
+      </div>
+
+      <div class="calendar-container">
+        <div class="calendar-grid">
+          <div class="weekdays-row">
+            <div *ngFor="let day of weekdays" class="weekday-cell">{{ day }}</div>
+          </div>
+
+          <div *ngFor="let week of calendarWeeks" class="week-row">
+            <div
+              *ngFor="let day of week"
+              class="day-cell"
               [class.today]="isToday(day.date)"
               [class.other-month]="isOtherMonth(day.date)"
               [style.background-color]="getDayColor(day.date)"
@@ -48,11 +376,11 @@ import { SupabaseService } from '../../services/supabase.service';
           <form (ngSubmit)="saveOrder()" #orderFormRef="ngForm">
             <div class="form-group">
               <label for="ristorante">Ristorante</label>
-              <select 
-                id="ristorante" 
-                name="ristorante" 
-                [(ngModel)]="orderForm.restaurantId" 
-                required 
+              <select
+                id="ristorante"
+                name="ristorante"
+                [(ngModel)]="orderForm.restaurantId"
+                required
                 class="form-input"
                 (change)="onRestaurantSelect()"
               >
@@ -73,29 +401,29 @@ import { SupabaseService } from '../../services/supabase.service';
             
             <div class="form-group">
               <label for="data">Data</label>
-              <input 
-                type="date" 
-                id="data" 
-                name="data" 
-                [(ngModel)]="orderForm.data" 
-                required 
+              <input
+                type="date"
+                id="data"
+                name="data"
+                [(ngModel)]="orderForm.data"
+                required
                 class="form-input"
-              >
+              />
             </div>
             
             <div class="form-group">
               <label for="importo">Importo</label>
-              <input 
-                type="number" 
-                id="importo" 
-                name="importo" 
-                [(ngModel)]="orderForm.importo" 
-                required 
-                min="0" 
-                step="0.01" 
+              <input
+                type="number"
+                id="importo"
+                name="importo"
+                [(ngModel)]="orderForm.importo"
+                required
+                min="0"
+                step="0.01"
                 class="form-input"
                 placeholder="0.00"
-              >
+              />
             </div>
             
             <div class="popup-actions">
@@ -113,8 +441,6 @@ import { SupabaseService } from '../../services/supabase.service';
       flex-direction: column;
       min-height: calc(100vh - 80px);
       background: #fff7ed;
-      padding: 0;
-      margin: 0;
       position: relative;
     }
 
@@ -242,11 +568,8 @@ import { SupabaseService } from '../../services/supabase.service';
 
     .popup-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -259,7 +582,7 @@ import { SupabaseService } from '../../services/supabase.service';
       padding: 2rem;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     }
 
     .popup-title {
@@ -298,7 +621,7 @@ import { SupabaseService } from '../../services/supabase.service';
     .form-input:focus {
       border-color: #f97316;
       background: white;
-      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+      box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
     }
 
     .selected-color {
