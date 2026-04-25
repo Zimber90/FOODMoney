@@ -10,18 +10,19 @@ import { SupabaseService } from '../../services/supabase.service';
   template: `
     <div class="auth-container">
       <div class="auth-card">
-        <h1>Benvenuto</h1>
-        <p>Inserisci la tua email per accedere con un Magic Link</p>
+        <div class="logo">🍔💰</div>
+        <h1>FoodMoney</h1>
+        <p>Tieni traccia di quanto spendi per mangiare.</p>
         <form (ngSubmit)="handleLogin()">
           <input 
             type="email" 
             [(ngModel)]="email" 
             name="email" 
-            placeholder="tua@email.it" 
+            placeholder="La tua email" 
             required
           />
           <button type="submit" [disabled]="loading">
-            {{ loading ? 'Invio in corso...' : 'Invia Magic Link' }}
+            {{ loading ? 'Invio...' : 'Accedi con Magic Link' }}
           </button>
         </form>
       </div>
@@ -33,40 +34,43 @@ import { SupabaseService } from '../../services/supabase.service';
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: #f8fafc;
+      background: #fff7ed;
     }
     .auth-card {
       background: white;
-      padding: 2.5rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      padding: 3rem;
+      border-radius: 2rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
       width: 100%;
       max-width: 400px;
       text-align: center;
     }
-    h1 { color: #1e293b; margin-bottom: 0.5rem; }
-    p { color: #64748b; margin-bottom: 2rem; }
+    .logo { font-size: 3rem; margin-bottom: 1rem; }
+    h1 { color: #9a3412; margin-bottom: 0.5rem; font-size: 2rem; }
+    p { color: #9a3412; opacity: 0.7; margin-bottom: 2rem; }
     input {
       width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.75rem;
+      padding: 1rem;
+      border: 2px solid #fed7aa;
+      border-radius: 1rem;
       margin-bottom: 1rem;
       font-size: 1rem;
+      outline: none;
     }
+    input:focus { border-color: #f97316; }
     button {
       width: 100%;
-      padding: 0.75rem;
-      background: #3b82f6;
+      padding: 1rem;
+      background: #f97316;
       color: white;
       border: none;
-      border-radius: 0.75rem;
-      font-weight: 600;
+      border-radius: 1rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: transform 0.2s;
     }
-    button:hover { background: #2563eb; }
-    button:disabled { opacity: 0.7; cursor: not-allowed; }
+    button:hover { transform: translateY(-2px); background: #ea580c; }
+    button:disabled { opacity: 0.5; }
   `]
 })
 export class AuthComponent {
@@ -79,9 +83,9 @@ export class AuthComponent {
     this.loading = true;
     try {
       await this.supabase.signIn(this.email);
-      alert('Controlla la tua email per il link di accesso!');
+      alert('Controlla la tua email!');
     } catch (error) {
-      alert('Errore durante l\'invio del link');
+      alert('Errore!');
     } finally {
       this.loading = false;
     }
