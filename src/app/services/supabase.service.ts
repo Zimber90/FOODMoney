@@ -13,12 +13,9 @@ export class SupabaseService {
   user$ = this._user.asObservable();
   
   constructor() {
-    // Ascolta i cambiamenti di stato dell'autenticazione
     supabase.auth.onAuthStateChange((_event, session) => {
       this._user.next(session?.user ?? null);
     });
-    
-    // Recupera la sessione iniziale all'avvio
     this.initializeSession();
   }
 
@@ -30,9 +27,7 @@ export class SupabaseService {
   async signIn(email: string) {
     return await supabase.auth.signInWithOtp({ 
       email,
-      options: {
-        emailRedirectTo: window.location.origin
-      }
+      options: { emailRedirectTo: window.location.origin }
     });
   }
 
@@ -50,30 +45,35 @@ export class SupabaseService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: any) {
-      console.error('Errore nel recupero spese:', error);
       return { data: [], error };
     }
   }
 
-  async addExpense(amount: number, description: string) {
+  async addExpense(amount: number, description: string, category: string) {
     const user = this._user.value;
     if (!user) throw new Error('Utente non autenticato');
     
-    try {
-      const { data, error } = await supabase
-        .from('expenses')
-        .insert([{ 
-          amount, 
-          description, 
-          user_id: user.id 
-        }])
-        .select();
-      
-      if (error) throw error;
-      return { data, error: null };
-    } catch (error: any) {
-      console.error('Errore nell\'aggiunta spesa:', error);
-      throw error;
-    }
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert([{ 
+        amount, 
+        description, 
+        category,
+        user_id: user.id 
+      }])
+      .select();
+    
+    if (error) throw error;
+    return { data, error: null };
+  }
+
+  async deleteExpense(id: string) {
+    const { error } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    return { error: null };
   }
 }
