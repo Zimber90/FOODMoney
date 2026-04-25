@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
@@ -32,15 +32,27 @@ import { SupabaseService } from '../../services/supabase.service';
         <form (ngSubmit)="saveOrder()" #orderFormRef="ngForm">
           <div class="form-group">
             <label for="ristorante">Ristorante</label>
-            <input 
-              type="text" 
+            <select 
               id="ristorante" 
               name="ristorante" 
-              [(ngModel)]="orderForm.ristorante" 
+              [(ngModel)]="orderForm.restaurantId" 
               required 
               class="form-input"
-              placeholder="Nome ristorante"
+              (change)="onRestaurantSelect()"
             >
+              <option value="" disabled>Scegli un ristorante</option>
+              @for (restaurant of restaurants; track restaurant.id) {
+                <option [value]="restaurant.id">
+                  {{ restaurant.name }}
+                </option>
+              }
+            </select>
+            @if (selectedRestaurantColor) {
+              <div class="selected-color">
+                <span class="color-swatch" [style.background-color]="selectedRestaurantColor"></span>
+                <span>Colore: {{ selectedRestaurantColor }}</span>
+              </div>
+            }
           </div>
           
           <div class="form-group">
@@ -68,18 +80,6 @@ import { SupabaseService } from '../../services/supabase.service';
               class="form-input"
               placeholder="0.00"
             >
-          </div>
-
-          <div class="form-group">
-            <label for="colore">Colore Ristorante</label>
-            <input 
-              type="color" 
-              id="colore" 
-              name="colore" 
-              [(ngModel)]="orderForm.colore" 
-              class="form-input color-picker"
-            >
-            <small class="color-hint">Scegli un colore per riconoscere il ristorante in calendario</small>
           </div>
           
           <div class="popup-actions">
@@ -187,19 +187,22 @@ import { SupabaseService } from '../../services/supabase.service';
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
 
-    .color-picker {
-      height: 50px;
-      padding: 0.5rem;
-      cursor: pointer;
+    .selected-color {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #9a3412;
+      margin-left: 0.5rem;
     }
 
-    .color-hint {
-      display: block;
-      font-size: 0.7rem;
-      color: #9a3412;
-      opacity: 0.7;
-      margin-top: 0.25rem;
-      margin-left: 0.5rem;
+    .color-swatch {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      flex-shrink: 0;
     }
 
     .popup-actions {
@@ -244,14 +247,35 @@ import { SupabaseService } from '../../services/supabase.service';
     }
   `]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   isOrderPopupOpen = false;
-  orderForm = { ristorante: '', data: '', importo: 0, colore: '#f97316' };
+  orderForm = { restaurantId: '', data: '', importo: 0 };
   supabase = inject(SupabaseService);
+  restaurants: any[] = [];
+  selectedRestaurantColor = '';
+
+  ngOnInit() {
+    this.loadRestaurants();
+  }
+
+  async loadRestaurants() {
+    try {
+      const { data } = await this.supabase.getRestaurants();
+      this.restaurants = data || [];
+    } catch (error) {
+      console.error('Errore caricamento ristoranti:', error);
+    }
+  }
+
+  onRestaurantSelect() {
+    const selected = this.restaurants.find(r => r.id === this.orderForm.restaurantId);
+    this.selectedRestaurantColor = selected?.color || '';
+  }
 
   openOrderPopup() {
     this.isOrderPopupOpen = true;
-    this.orderForm = { ristorante: '', data: new Date().toISOString().split('T')[0], importo: 0, colore: '#f97316' };
+    this.orderForm = { restaurantId: '', data: new Date().toISOString().split('T')[0], importo: 0 };
+    this.selectedRestaurantColor = '';
   }
 
   closeOrderPopup() {
@@ -259,17 +283,20 @@ export class HomeComponent {
   }
 
   async saveOrder() {
-    if (!this.orderForm.ristorante || !this.orderForm.data || !this.orderForm.importo) {
+    if (!this.orderForm.restaurantId || !this.orderForm.data || !this.orderForm.importo) {
       return;
     }
+
+    const selectedRestaurant = this.restaurants.find(r => r.id === this.orderForm.restaurantId);
+    if (!selectedRestaurant) return;
 
     try {
       const { error } = await this.supabase.addExpense(
         parseFloat(this.orderForm.importo.toString()),
-        this.orderForm.ristorante,
+        selectedRestaurant.name,
         'Ristorante',
         this.orderForm.data,
-        this.orderForm.colore
+        selectedRestaurant.color
       );
 
       if (error) {

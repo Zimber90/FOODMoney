@@ -52,15 +52,27 @@ import { SupabaseService } from '../../services/supabase.service';
           <form (ngSubmit)="saveEditedOrder()" #editFormRef="ngForm">
             <div class="form-group">
               <label for="edit-ristorante">Ristorante</label>
-              <input 
-                type="text" 
+              <select 
                 id="edit-ristorante" 
                 name="ristorante" 
-                [(ngModel)]="editForm.ristorante" 
+                [(ngModel)]="editForm.restaurantId" 
                 required 
                 class="form-input"
-                placeholder="Nome ristorante"
+                (change)="onEditRestaurantSelect()"
               >
+                <option value="" disabled>Scegli un ristorante</option>
+                @for (restaurant of restaurants; track restaurant.id) {
+                  <option [value]="restaurant.id">
+                    {{ restaurant.name }}
+                  </option>
+                }
+              </select>
+              @if (editSelectedRestaurantColor) {
+                <div class="selected-color">
+                  <span class="color-swatch" [style.background-color]="editSelectedRestaurantColor"></span>
+                  <span>Colore: {{ editSelectedRestaurantColor }}</span>
+                </div>
+              }
             </div>
             
             <div class="form-group">
@@ -88,18 +100,6 @@ import { SupabaseService } from '../../services/supabase.service';
                 class="form-input"
                 placeholder="0.00"
               >
-            </div>
-
-            <div class="form-group">
-              <label for="edit-colore">Colore Ristorante</label>
-              <input 
-                type="color" 
-                id="edit-colore" 
-                name="colore" 
-                [(ngModel)]="editForm.colore" 
-                class="form-input color-picker"
-              >
-              <small class="color-hint">Modifica il colore del ristorante</small>
             </div>
             
             <div class="popup-actions">
@@ -288,19 +288,22 @@ import { SupabaseService } from '../../services/supabase.service';
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
 
-    .color-picker {
-      height: 50px;
-      padding: 0.5rem;
-      cursor: pointer;
+    .selected-color {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #9a3412;
+      margin-left: 0.5rem;
     }
 
-    .color-hint {
-      display: block;
-      font-size: 0.7rem;
-      color: #9a3412;
-      opacity: 0.7;
-      margin-top: 0.25rem;
-      margin-left: 0.5rem;
+    .color-swatch {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      flex-shrink: 0;
     }
 
     .popup-actions {
@@ -350,13 +353,25 @@ export class HistoryComponent implements OnInit {
   private supabase = inject(SupabaseService);
   orders: any[] = [];
   filteredOrders: any[] = [];
+  restaurants: any[] = [];
   
   isEditPopupOpen = false;
   editingOrder: any = null;
-  editForm = { ristorante: '', data: '', importo: 0, colore: '#f97316' };
+  editForm = { restaurantId: '', data: '', importo: 0 };
+  editSelectedRestaurantColor = '';
 
   ngOnInit() {
     this.loadOrders();
+    this.loadRestaurants();
+  }
+
+  async loadRestaurants() {
+    try {
+      const { data } = await this.supabase.getRestaurants();
+      this.restaurants = data || [];
+    } catch (error) {
+      console.error('Errore caricamento ristoranti:', error);
+    }
   }
 
   loadOrders() {
@@ -381,36 +396,47 @@ export class HistoryComponent implements OnInit {
     });
   }
 
+  onEditRestaurantSelect() {
+    const selected = this.restaurants.find(r => r.id === this.editForm.restaurantId);
+    this.editSelectedRestaurantColor = selected?.color || '';
+  }
+
   openEditPopup(order: any) {
     this.editingOrder = order;
+    // Find the restaurant by name to get its ID
+    const existingRestaurant = this.restaurants.find(r => r.name === order.description);
     this.editForm = {
-      ristorante: order.description,
+      restaurantId: existingRestaurant?.id || '',
       importo: order.amount,
-      data: new Date(order.created_at).toISOString().split('T')[0],
-      colore: order.restaurant_color || '#f97316'
+      data: new Date(order.created_at).toISOString().split('T')[0]
     };
+    this.editSelectedRestaurantColor = existingRestaurant?.color || order.restaurant_color || '#f97316';
     this.isEditPopupOpen = true;
   }
 
   closeEditPopup() {
     this.isEditPopupOpen = false;
     this.editingOrder = null;
-    this.editForm = { ristorante: '', data: '', importo: 0, colore: '#f97316' };
+    this.editForm = { restaurantId: '', data: '', importo: 0 };
+    this.editSelectedRestaurantColor = '';
   }
 
   async saveEditedOrder() {
-    if (!this.editingOrder || !this.editForm.ristorante || !this.editForm.data || !this.editForm.importo) {
+    if (!this.editingOrder || !this.editForm.restaurantId || !this.editForm.data || !this.editForm.importo) {
       return;
     }
+
+    const selectedRestaurant = this.restaurants.find(r => r.id === this.editForm.restaurantId);
+    if (!selectedRestaurant) return;
 
     try {
       const { error } = await this.supabase.updateExpense(
         this.editingOrder.id,
         this.editForm.importo,
-        this.editForm.ristorante,
+        selectedRestaurant.name,
         'Ristorante',
         this.editForm.data,
-        this.editForm.colore
+        selectedRestaurant.color
       );
 
       if (error) {
@@ -422,10 +448,10 @@ export class HistoryComponent implements OnInit {
       if (index !== -1) {
         this.orders[index] = {
           ...this.orders[index],
-          description: this.editForm.ristorante,
+          description: selectedRestaurant.name,
           amount: this.editForm.importo,
           created_at: this.editForm.data,
-          restaurant_color: this.editForm.colore
+          restaurant_color: selectedRestaurant.color
         };
         this.filteredOrders = [...this.orders];
       }
