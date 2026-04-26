@@ -11,66 +11,134 @@ import { SupabaseService } from '../../services/supabase.service';
     <div class="more-page">
       <h1 class="page-title">Altro</h1>
 
-      <!-- Restaurant Management Section -->
-      <div class="section">
-        <h2 class="section-title">Gestione Ristoranti</h2>
-        <p class="section-subtitle">Salva i tuoi ristoranti preferiti con il loro colore identificativo</p>
+      <!-- Menu Navigation -->
+      <div class="menu-navigation">
+        <button 
+          class="menu-item" 
+          [class.active]="selectedMenu === 'menu'"
+          (click)="selectMenu('menu')"
+        >
+          Menu
+        </button>
+        <button 
+          class="menu-item" 
+          [class.active]="selectedMenu === 'settings'"
+          (click)="selectMenu('settings')"
+        >
+          Impostazioni        </button>
+        <button 
+          class="menu-item" 
+          [class.active]="selectedMenu === 'restaurant-management'"
+          (click)="selectMenu('restaurant-management')"
+        >
+          Gestione Ristorante
+        </button>
+        <button 
+          class="menu-item" 
+          [class.active]="selectedMenu === 'user'"
+          (click)="selectMenu('user')"
+        >
+          Utente
+        </button>
+        <button 
+          class="menu-item" 
+          [class.active]="selectedMenu === 'app-info'"
+          (click)="selectMenu('app-info')"
+        >
+          Info App
+        </button>
+      </div>
 
-        <!-- Add / Edit Form -->
-        <div class="restaurant-form">
-          <div class="form-group">
-            <label for="rest-name">Nome Ristorante</label>
-            <input
-              type="text"
-              id="rest-name"
-              [(ngModel)]="restForm.name"
-              placeholder="Es. GG, McDonald's"
-              class="form-input"
-              required
-            />
-          </div>
+      <!-- Content based on selected menu -->
+      <div class="content-area">
+        <!-- Menu Section -->
+        <div *ngIf="selectedMenu === 'menu'" class="section">
+          <h2 class="section-title">Menu</h2>
+          <p class="section-subtitle">Qui puoi accedere alle principali funzionalità dell'applicazione.</p>
+          <!-- Additional menu content can be added here -->
+        </div>
 
-          <div class="form-group">
-            <label for="rest-color">Colore Identificativo</label>
-            <div class="color-picker-wrapper">
+        <!-- Settings Section -->
+        <div *ngIf="selectedMenu === 'settings'" class="section">
+          <h2 class="section-title">Impostazioni</h2>
+          <p class="section-subtitle">Personalizza l'esperienza utente secondo le tue preferenze.</p>
+          <!-- Settings form or content would go here -->
+        </div>
+
+        <!-- Restaurant Management Section -->
+        <div *ngIf="selectedMenu === 'restaurant-management'" class="section restaurant-management-section">
+          <h2 class="section-title">Gestione Ristorante</h2>
+          <p class="section-subtitle">Salva i tuoi ristoranti preferiti con il loro colore identificativo</p>
+
+          <!-- Add / Edit Form -->
+          <div class="restaurant-form">
+            <div class="form-group">
+              <label for="rest-name">Nome Ristorante</label>
               <input
-                type="color"
-                id="rest-color"
-                [(ngModel)]="restForm.color"
-                class="form-input color-picker"
-              />
-              <span class="color-preview" [style.background-color]="restForm.color"></span>
+                type="text"
+                id="rest-name"
+                [(ngModel)]="restForm.name"
+                placeholder="Es. GG, McDonald's"
+                class="form-input"
+                required              />
+            </div>
+
+            <div class="form-group">
+              <label for="rest-color">Colore Identificativo</label>
+              <div class="color-picker-wrapper">
+                <input
+                  type="color"
+                  id="rest-color"
+                  [(ngModel)]="restForm.color"
+                  class="form-input color-picker"
+                />
+                <span class="color-preview" [style.background-color]="restForm.color"></span>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              @if (editingRestaurantId) {
+                <button class="btn-save" (click)="updateRestaurant()">Aggiorna</button>
+                <button class="btn-close" (click)="cancelEdit()">Annulla</button>
+              } @else {
+                <button class="btn-save" (click)="addRestaurant()">Aggiungi Ristorante</button>
+              }
             </div>
           </div>
 
-          <div class="form-actions">
-            @if (editingRestaurantId) {
-              <button class="btn-save" (click)="updateRestaurant()">Aggiorna</button>
-              <button class="btn-close" (click)="cancelEdit()">Annulla</button>
-            } @else {
-              <button class="btn-save" (click)="addRestaurant()">Aggiungi Ristorante</button>
+          <!-- List of Saved Restaurants -->
+          <div class="restaurants-list">
+            @if (restaurants.length === 0) {
+              <div class="empty-state">Nessun ristorante salvato. Aggiungine uno sopra!</div>
+            }
+
+            @for (restaurant of restaurants; track restaurant.id) {
+              <div class="restaurant-item">
+                <div class="restaurant-info">
+                  <span class="color-swatch" [style.background-color]="restaurant.color"></span>
+                  <span class="restaurant-name">{{ restaurant.name }}</span>
+                </div>
+                <div class="restaurant-actions">
+                  <button class="edit-btn" (click)="startEdit(restaurant)">✏️</button>
+                  <button class="delete-btn" (click)="deleteRestaurant(restaurant.id)">🗑️</button>
+                </div>
+              </div>
             }
           </div>
         </div>
 
-        <!-- List of Saved Restaurants -->
-        <div class="restaurants-list">
-          @if (restaurants.length === 0) {
-            <div class="empty-state">Nessun ristorante salvato. Aggiungine uno sopra!</div>
-          }
+        <!-- User Section -->
+        <div *ngIf="selectedMenu === 'user'" class="section">
+          <h2 class="section-title">Utente</h2>
+          <p class="section-subtitle">Gestisci le informazioni del tuo profilo.</p>
+          <!-- User management content would go here -->
+        </div>
 
-          @for (restaurant of restaurants; track restaurant.id) {
-            <div class="restaurant-item">
-              <div class="restaurant-info">
-                <span class="color-swatch" [style.background-color]="restaurant.color"></span>
-                <span class="restaurant-name">{{ restaurant.name }}</span>
-              </div>
-              <div class="restaurant-actions">
-                <button class="edit-btn" (click)="startEdit(restaurant)">✏️</button>
-                <button class="delete-btn" (click)="deleteRestaurant(restaurant.id)">🗑️</button>
-              </div>
-            </div>
-          }
+        <!-- App Info Section -->
+        <div *ngIf="selectedMenu === 'app-info'" class="section">
+          <h2 class="section-title">Info App</h2>
+          <p class="section-subtitle">Informazioni sull'applicazione e le sue funzionalità.</p>
+          <!-- App information content would go here -->
         </div>
       </div>
     </div>
@@ -93,13 +161,51 @@ import { SupabaseService } from '../../services/supabase.service';
       margin-bottom: 2rem;
     }
 
-    .section {
+    /* Menu Navigation */
+    .menu-navigation {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding: 0.5rem 0;
+      margin-bottom: 1.5rem;
       width: 100%;
-      max-width: 400px;
+      max-width: 600px;
+      justify-content: center;
+    }
+    .menu-item {
+      padding: 0.6rem 1.2rem;
+      border: 2px solid #fed7aa;
+      border-radius: 1rem;
+      background: white;
+      color: #9a3412;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .menu-item.active {
+      background: #f97316;
+      color: white;
+      border-color: #f97316;
+    }
+    .menu-item:hover:not(.active) {
+      background: #fffcf9;
+    }
+
+    /* Content Area */
+    .content-area {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    /* Section styling */
+    .section {
       background: white;
       border-radius: 2rem;
       padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgba(249,115,22,0.1);
+      box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
       margin-bottom: 2rem;
     }
 
@@ -117,6 +223,7 @@ import { SupabaseService } from '../../services/supabase.service';
       margin-bottom: 1.5rem;
     }
 
+    /* Restaurant Form */
     .restaurant-form {
       margin-bottom: 2rem;
     }
@@ -145,7 +252,6 @@ import { SupabaseService } from '../../services/supabase.service';
       transition: all 0.2s;
       background: #fffcf9;
     }
-
     .form-input:focus {
       border-color: #f97316;
       background: white;
@@ -190,7 +296,6 @@ import { SupabaseService } from '../../services/supabase.service';
       cursor: pointer;
       transition: all 0.2s;
     }
-
     .btn-save:hover {
       background: #ea580c;
       transform: translateY(-2px);
@@ -207,11 +312,11 @@ import { SupabaseService } from '../../services/supabase.service';
       cursor: pointer;
       transition: all 0.2s;
     }
-
     .btn-close:hover {
       background: #e0e0e0;
     }
 
+    /* Restaurants List */
     .restaurants-list {
       display: flex;
       flex-direction: column;
@@ -235,9 +340,11 @@ import { SupabaseService } from '../../services/supabase.service';
       border-radius: 1rem;
       transition: background 0.2s;
     }
-
     .restaurant-item:hover {
       background: #fff0e6;
+    }
+    .restaurant-item:last-child {
+      border-bottom: none;
     }
 
     .restaurant-info {
@@ -273,14 +380,21 @@ import { SupabaseService } from '../../services/supabase.service';
       padding: 0.25rem;
       transition: transform 0.2s;
     }
-
     .edit-btn:hover, .delete-btn:hover {
       transform: scale(1.1);
     }
 
     @media (max-width: 768px) {
-      .section {
-        width: 90%;
+      .menu-navigation {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .menu-item {
+        width: 100%;
+        text-align: left;
+      }
+      .content-area {
+        max-width: 90%;
       }
     }
   `]
@@ -290,6 +404,8 @@ export class MoreComponent implements OnInit {
   restaurants: any[] = [];
   restForm = { name: '', color: '#f97316' };
   editingRestaurantId: string | null = null;
+
+  selectedMenu: string = 'menu'; // Default selected menu
 
   ngOnInit() {
     this.loadRestaurants();
@@ -302,6 +418,10 @@ export class MoreComponent implements OnInit {
     } catch (error) {
       console.error('Errore caricamento ristoranti:', error);
     }
+  }
+
+  selectMenu(menu: string) {
+    this.selectedMenu = menu;
   }
 
   async addRestaurant() {
@@ -360,7 +480,7 @@ export class MoreComponent implements OnInit {
     this.restForm = { name: '', color: '#f97316' };
   }
 
-  async deleteRestaurant(id: string) {
+  deleteRestaurant(id: string) {
     if (!confirm('Sei sicuro di voler eliminare questo ristorante?')) return;
 
     try {
