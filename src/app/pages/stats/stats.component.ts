@@ -15,8 +15,20 @@ import { SupabaseService } from '../../services/supabase.service';
         <p>Spesa totale: <strong>€ {{ totalSpent | number:'1.2-2' }}</strong></p>
       </div>
       
+      <div class="search-container">
+        <input
+          type="text"
+          placeholder="Cerca ristorante..."
+          (input)="onSearch($event)"
+          class="search-input"
+        />
+      </div>
+      
       <div class="expenses-list">
         <h2 class="section-title">Ordini recenti</h2>
+        <div *ngIf="filteredExpenses.length === 0" class="empty-state">
+          Nessun ordine trovato
+        </div>
         <div *ngFor="let expense of filteredExpenses" class="expense-item">
           <span class="expense-date">{{ expense.created_at | date:'dd/MM' }}</span>
           <span class="expense-restaurant">{{ expense.description }}</span>
@@ -54,6 +66,26 @@ import { SupabaseService } from '../../services/supabase.service';
     .total-spent strong {
       color: #f97316;
     }
+    .search-container {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 1.5rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #fed7aa;
+      border-radius: 1rem;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+      background: #fffcf9;
+    }
+    .search-input:focus {
+      border-color: #f97316;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
     .expenses-list {
       width: 100%;
       max-width: 400px;
@@ -85,8 +117,17 @@ import { SupabaseService } from '../../services/supabase.service';
       font-weight: 700;
       color: #9a3412;
     }
+    .empty-state {
+      text-align: center;
+      color: #9a3412;
+      opacity: 0.6;
+      padding: 2rem 0;
+      font-size: 0.95rem;
+    }
     @media (max-width: 768px) {
-      .total-spent {
+      .total-spent,
+      .search-container,
+      .expenses-list {
         max-width: 90%;
       }
     }
@@ -97,6 +138,7 @@ export class StatsComponent implements OnInit {
   loading = true;
   filteredExpenses: any[] = [];
   totalSpent = 0;
+  allExpenses: any[] = [];
 
   ngOnInit() {
     this.loadExpenses();
@@ -106,7 +148,8 @@ export class StatsComponent implements OnInit {
     try {
       const { data, error } = await this.supabase.getExpenses();
       if (error) throw error;
-      this.filteredExpenses = data || [];
+      this.allExpenses = data || [];
+      this.filteredExpenses = this.allExpenses;
       this.calculateTotalSpent();
     } catch (err) {
       console.error('Errore caricamento spese:', err);
@@ -117,5 +160,16 @@ export class StatsComponent implements OnInit {
 
   calculateTotalSpent() {
     this.totalSpent = this.filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }
+
+  onSearch(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const query = input.value.toLowerCase();
+
+    this.filteredExpenses = this.allExpenses.filter((expense) => {
+      return expense.description.toLowerCase().includes(query);
+    });
+
+    this.calculateTotalSpent();
   }
 }
