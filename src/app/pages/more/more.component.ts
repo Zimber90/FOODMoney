@@ -253,6 +253,31 @@ import { SupabaseService } from '../../services/supabase.service';
         <div *ngIf="selectedMenu === 'app-info'" class="section">
           <h2 class="section-title">Info App</h2>
           <p class="section-subtitle">Informazioni sull'applicazione e le sue funzionalità.</p>
+          
+          <div class="app-info-content">
+            <!-- App Name & Version -->
+            <div class="app-identity">
+              <h3 class="app-name">{{ appName }} <span class="app-version">v{{ appVersion }}</span></h3>
+            </div>
+            
+            <!-- Last Update Date -->
+            <div class="app-update-date">
+              <p>Ultimo aggiornamento: <strong>{{ appUpdateDate }}</strong></p>
+            </div>
+            
+            <!-- Main Features -->
+            <div class="app-features">
+              <h4 class="features-title">Funzionalità principali</h4>
+              <ul class="features-list">
+                @for (feature of appFeatures; track feature) {
+                  <li class="feature-item">
+                    <span class="feature-check">✓</span>
+                    {{ feature }}
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -590,6 +615,74 @@ import { SupabaseService } from '../../services/supabase.service';
         transform: scale(1.1);
       }
 
+      /* App Info Section Styles */
+      .app-info-content {
+        margin-top: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .app-identity {
+        text-align: center;
+      }
+
+      .app-name {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #9a3412;
+        margin: 0;
+      }
+
+      .app-version {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #f97316;
+        margin-left: 0.5rem;
+      }
+
+      .app-update-date {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #666;
+      }
+
+      .app-update-date strong {
+        color: #9a3412;
+      }
+
+      .features-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #9a3412;
+        margin-bottom: 1rem;
+      }
+
+      .features-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+        color: #333;
+        padding: 0.5rem 0;
+      }
+
+      .feature-check {
+        color: #f97316;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+
       @media (max-width: 768px) {
         .menu-navigation {
           flex-direction: column;
@@ -620,6 +713,19 @@ export class MoreComponent implements OnInit {
   emailNotificationsEnabled = false;
 
   selectedMenu: string = 'menu';
+
+  // App Info variables
+  appName = 'FoodMoney';
+  appVersion = '1.0.0';
+  appUpdateDate = '15 Maggio 2024';
+  appFeatures = [
+    'Traccia le tue spese nei ristoranti',
+    'Visualizza i tuoi ordini in un calendario mensile',
+    'Analizza le tue statistiche di spesa per periodo',
+    'Gestisci i tuoi ristoranti preferiti con colori identificativi',
+    'Esporta i dati delle spese in formato CSV',
+    'Modifica o elimina i tuoi ordini in qualsiasi momento'
+  ];
 
   ngOnInit() {
     this.loadRestaurants();
