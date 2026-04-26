@@ -143,261 +143,263 @@ import { SupabaseService } from '../../services/supabase.service';
       </div>
     </div>
   `,
-  styles: [`
-    .more-page {
-      padding: 2rem 1rem;
-      min-height: calc(100vh - 80px);
-      background: #fff7ed;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .page-title {
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 800;
-      color: #9a3412;
-      margin-bottom: 2rem;
-    }
-
-    /* Menu Navigation */
-    .menu-navigation {
-      display: flex;
-      gap: 0.5rem;
-      overflow-x: auto;
-      padding: 0.5rem 0;
-      margin-bottom: 1.5rem;
-      width: 100%;
-      max-width: 600px;
-      justify-content: center;
-    }
-    .menu-item {
-      padding: 0.6rem 1.2rem;
-      border: 2px solid #fed7aa;
-      border-radius: 1rem;
-      background: white;
-      color: #9a3412;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .menu-item.active {
-      background: #f97316;
-      color: white;
-      border-color: #f97316;
-    }
-    .menu-item:hover:not(.active) {
-      background: #fffcf9;
-    }
-
-    /* Content Area */
-    .content-area {
-      width: 100%;
-      max-width: 600px;
-    }
-
-    /* Section styling */
-    .section {
-      background: white;
-      border-radius: 2rem;
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
-      margin-bottom: 2rem;
-    }
-
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #9a3412;
-      margin-bottom: 0.5rem;
-    }
-
-    .section-subtitle {
-      font-size: 0.9rem;
-      color: #9a3412;
-      opacity: 0.7;
-      margin-bottom: 1.5rem;
-    }
-
-    /* Restaurant Form */
-    .restaurant-form {
-      margin-bottom: 2rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #9a3412;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-      margin-left: 0.5rem;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 1rem;
-      border: 2px solid #fed7aa;
-      border-radius: 1rem;
-      font-size: 1rem;
-      outline: none;
-      transition: all 0.2s;
-      background: #fffcf9;
-    }
-    .form-input:focus {
-      border-color: #f97316;
-      background: white;
-      box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
-    }
-
-    .color-picker-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .color-picker {
-      flex: 1;
-      height: 50px;
-      padding: 0.5rem;
-      cursor: pointer;
-    }
-
-    .color-preview {
-      width: 40px;
-      height: 40px;
-      border-radius: 0.5rem;
-      border: 2px solid #fed7aa;
-      flex-shrink: 0;
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-
-    .btn-save {
-      flex: 1;
-      padding: 1rem;
-      background: #f97316;
-      color: white;
-      border: none;
-      border-radius: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-save:hover {
-      background: #ea580c;
-      transform: translateY(-2px);
-    }
-
-    .btn-close {
-      flex: 1;
-      padding: 1rem;
-      background: #f0f0f0;
-      color: #666;
-      border: none;
-      border-radius: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-close:hover {
-      background: #e0e0e0;
-    }
-
-    /* Restaurants List */
-    .restaurants-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .empty-state {
-      text-align: center;
-      color: #9a3412;
-      opacity: 0.6;
-      padding: 1.5rem 0;
-      font-size: 0.95rem;
-    }
-
-    .restaurant-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      background: #fff7ed;
-      border-radius: 1rem;
-      transition: background 0.2s;
-    }
-    .restaurant-item:hover {
-      background: #fff0e6;
-    }
-    .restaurant-item:last-child {
-      border-bottom: none;
-    }
-
-    .restaurant-info {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .color-swatch {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      flex-shrink: 0;
-    }
-
-    .restaurant-name {
-      font-size: 1rem;
-      color: #333;
-      font-weight: 500;
-    }
-
-    .restaurant-actions {
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .edit-btn, .delete-btn {
-      background: none;
-      border: none;
-      font-size: 1.1rem;
-      cursor: pointer;
-      padding: 0.25rem;
-      transition: transform 0.2s;
-    }
-    .edit-btn:hover, .delete-btn:hover {
-      transform: scale(1.1);
-    }
-
-    @media (max-width: 768px) {
-      .menu-navigation {
+  styles: [
+    `
+      .more-page {
+        padding: 2rem 1rem;
+        min-height: calc(100vh - 80px);
+        background: #fff7ed;
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+      }
+
+      .page-title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #9a3412;
+        margin-bottom: 2rem;
+      }
+
+      /* Menu Navigation */
+      .menu-navigation {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding: 0.5rem 0;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        max-width: 600px;
+        justify-content: center;
       }
       .menu-item {
-        width: 100%;
-        text-align: left;
+        padding: 0.6rem 1.2rem;
+        border: 2px solid #fed7aa;
+        border-radius: 1rem;
+        background: white;
+        color: #9a3412;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
+      .menu-item.active {
+        background: #f97316;
+        color: white;
+        border-color: #f97316;
+      }
+      .menu-item:hover:not(.active) {
+        background: #fffcf9;
+      }
+
+      /* Content Area */
       .content-area {
-        max-width: 90%;
+        width: 100%;
+        max-width: 600px;
       }
-    }
-  `]
+
+      /* Section styling */
+      .section {
+        background: white;
+        border-radius: 2rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #9a3412;
+        margin-bottom: 0.5rem;
+      }
+
+      .section-subtitle {
+        font-size: 0.9rem;
+        color: #9a3412;
+        opacity: 0.7;
+        margin-bottom: 1.5rem;
+      }
+
+      /* Restaurant Form */
+      .restaurant-form {
+        margin-bottom: 2rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.25rem;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #9a3412;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        margin-left: 0.5rem;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #fed7aa;
+        border-radius: 1rem;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.2s;
+        background: #fffcf9;
+      }
+      .form-input:focus {
+        border-color: #f97316;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
+      }
+
+      .color-picker-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .color-picker {
+        flex: 1;
+        height: 50px;
+        padding: 0.5rem;
+        cursor: pointer;
+      }
+
+      .color-preview {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.5rem;
+        border: 2px solid #fed7aa;
+        flex-shrink: 0;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .btn-save {
+        flex: 1;
+        padding: 1rem;
+        background: #f97316;
+        color: white;
+        border: none;
+        border-radius: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-save:hover {
+        background: #ea580c;
+        transform: translateY(-2px);
+      }
+
+      .btn-close {
+        flex: 1;
+        padding: 1rem;
+        background: #f0f0f0;
+        color: #666;
+        border: none;
+        border-radius: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-close:hover {
+        background: #e0e0e0;
+      }
+
+      /* Restaurants List */
+      .restaurants-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: #9a3412;
+        opacity: 0.6;
+        padding: 1.5rem 0;
+        font-size: 0.95rem;
+      }
+
+      .restaurant-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #fff7ed;
+        border-radius: 1rem;
+        transition: background 0.2s;
+      }
+      .restaurant-item:hover {
+        background: #fff0e6;
+      }
+      .restaurant-item:last-child {
+        border-bottom: none;
+      }
+
+      .restaurant-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .color-swatch {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+
+      .restaurant-name {
+        font-size: 1rem;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .restaurant-actions {
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .edit-btn, .delete-btn {
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0.25rem;
+        transition: transform 0.2s;
+      }
+      .edit-btn:hover, .delete-btn:hover {
+        transform: scale(1.1);
+      }
+
+      @media (max-width: 768px) {
+        .menu-navigation {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .menu-item {
+          width: 100%;
+          text-align: left;
+        }
+        .content-area {
+          max-width: 90%;
+        }
+      }
+    `
+  ]
 })
 export class MoreComponent implements OnInit {
   private supabase = inject(SupabaseService);
@@ -480,7 +482,7 @@ export class MoreComponent implements OnInit {
     this.restForm = { name: '', color: '#f97316' };
   }
 
-  deleteRestaurant(id: string) {
+  async deleteRestaurant(id: string) {
     if (!confirm('Sei sicuro di voler eliminare questo ristorante?')) return;
 
     try {
