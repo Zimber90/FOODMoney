@@ -96,6 +96,7 @@ export class StatsComponent implements OnInit {
   private supabase = inject(SupabaseService);
   loading = true;
   filteredExpenses: any[] = [];
+  totalSpent = 0;
 
   ngOnInit() {
     this.loadExpenses();
@@ -106,10 +107,15 @@ export class StatsComponent implements OnInit {
       const { data, error } = await this.supabase.getExpenses();
       if (error) throw error;
       this.filteredExpenses = data || [];
+      this.calculateTotalSpent();
     } catch (err) {
       console.error('Errore caricamento spese:', err);
     } finally {
       this.loading = false;
     }
+  }
+
+  calculateTotalSpent() {
+    this.totalSpent = this.filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   }
 }
