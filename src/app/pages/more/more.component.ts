@@ -630,11 +630,11 @@ export class MoreComponent implements OnInit {
     const user = this.supabase.getUser();
     if (user) {
       this.userProfile = { 
-        name: user.user_metadata?.full_name || '', 
+        name: user.user_metadata?.['full_name'] || '', 
         email: user.email || '' 
       };
       // Carica lo stato delle notifiche (da implementare nel backend)
-      this.emailNotificationsEnabled = user.user_metadata?.email_notifications || false;
+      this.emailNotificationsEnabled = user.user_metadata?.['email_notifications'] || false;
     }
   }
 

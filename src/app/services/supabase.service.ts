@@ -61,7 +61,7 @@ export class SupabaseService {
     
     // Aggiorna metadati utente
     const { error: metaError } = await supabase.auth.updateUser({
-      data: { full_name: name, email_notifications: this._user.value?.user_metadata?.email_notifications || false }
+      data: { full_name: name, email_notifications: this._user.value?.user_metadata?.['email_notifications'] || false }
     });
     if (metaError) throw metaError;
 
