@@ -24,6 +24,10 @@ export class SupabaseService {
     this._user.next(session?.user ?? null);
   }
 
+  getUser(): User | null {
+    return this._user.value;
+  }
+
   // ── Auth ─────────────────────────────────────────────────────────────────────
   async signIn(email: string, password: string) {
     return await supabase.auth.signInWithPassword({ email, password });
@@ -34,6 +38,52 @@ export class SupabaseService {
   }
 
   async signOut() {
+    return await supabase.auth.signOut();
+  }
+
+  async updateUserProfile(name: string, email: string) {
+    const user = this._user.value;
+    if (!user) throw new Error('Utente non autenticato');
+
+    // Aggiorna email se diversa
+    if (email !== user.email) {
+      const { error: emailError } = await supabase.auth.updateUser({ email });
+      if (emailError) throw emailError;
+    }
+
+    // Aggiorna profilo
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ name, email })
+      .eq('id', user.id);
+
+    if (profileError) throw profileError;
+    
+    // Aggiorna metadati utente
+    const { error: metaError } = await supabase.auth.updateUser({
+      data: { full_name: name, email_notifications: this._user.value?.user_metadata?.email_notifications || false }
+    });
+    if (metaError) throw metaError;
+
+    return { error: null };
+  }
+
+  async changePassword(oldPassword: string, newPassword: string) {
+    return await supabase.auth.updateUser({
+      password: newPassword
+    });
+  }
+
+  async deleteAccount() {
+    const user = this._user.value;
+    if (!user) throw new Error('Utente non autenticato');
+
+    // Elimina dati associati
+    await supabase.from('expenses').delete().eq('user_id', user.id);
+    await supabase.from('restaurants').delete().eq('user_id', user.id);
+    await supabase.from('profiles').delete().eq('id', user.id);
+    
+    // Disconnette
     return await supabase.auth.signOut();
   }
 

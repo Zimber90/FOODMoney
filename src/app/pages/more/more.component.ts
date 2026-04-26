@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
@@ -25,7 +25,8 @@ import { SupabaseService } from '../../services/supabase.service';
           [class.active]="selectedMenu === 'settings'"
           (click)="selectMenu('settings')"
         >
-          Impostazioni        </button>
+          Impostazioni
+        </button>
         <button 
           class="menu-item" 
           [class.active]="selectedMenu === 'restaurant-management'"
@@ -55,14 +56,12 @@ import { SupabaseService } from '../../services/supabase.service';
         <div *ngIf="selectedMenu === 'menu'" class="section">
           <h2 class="section-title">Menu</h2>
           <p class="section-subtitle">Qui puoi accedere alle principali funzionalità dell'applicazione.</p>
-          <!-- Additional menu content can be added here -->
         </div>
 
         <!-- Settings Section -->
         <div *ngIf="selectedMenu === 'settings'" class="section">
           <h2 class="section-title">Impostazioni</h2>
           <p class="section-subtitle">Personalizza l'esperienza utente secondo le tue preferenze.</p>
-          <!-- Settings form or content would go here -->
         </div>
 
         <!-- Restaurant Management Section -->
@@ -80,7 +79,8 @@ import { SupabaseService } from '../../services/supabase.service';
                 [(ngModel)]="restForm.name"
                 placeholder="Es. GG, McDonald's"
                 class="form-input"
-                required              />
+                required
+              />
             </div>
 
             <div class="form-group">
@@ -131,14 +131,128 @@ import { SupabaseService } from '../../services/supabase.service';
         <div *ngIf="selectedMenu === 'user'" class="section">
           <h2 class="section-title">Utente</h2>
           <p class="section-subtitle">Gestisci le informazioni del tuo profilo.</p>
-          <!-- User management content would go here -->
+
+          <!-- 1. Modifica dati profilo -->
+          <div class="profile-form">
+            <h3>Modifica Profilo</h3>
+            <form (ngSubmit)="updateProfile()" #profileForm="ngForm">
+              <div class="form-group">
+                <label for="name">Nome</label>
+                <input 
+                  type="text" 
+                  id="name" 
+                  [(ngModel)]="userProfile.name" 
+                  name="name"
+                  required 
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  [(ngModel)]="userProfile.email" 
+                  name="email"
+                  required 
+                  class="form-input"
+                />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-save">Salva Modifiche</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 2. Cambia password -->
+          <div class="password-form">
+            <h3>Cambia Password</h3>
+            <form (ngSubmit)="changePassword()" #passwordForm="ngForm">
+              <div class="form-group">
+                <label for="currentPassword">Password attuale</label>
+                <input 
+                  type="password" 
+                  id="currentPassword" 
+                  [(ngModel)]="currentPassword" 
+                  name="currentPassword"
+                  required 
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group">
+                <label for="newPassword">Nuova password</label>
+                <input 
+                  type="password" 
+                  id="newPassword" 
+                  [(ngModel)]="newPassword" 
+                  name="newPassword"
+                  required 
+                  minlength="6"
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group">
+                <label for="confirmPassword">Conferma password</label>
+                <input 
+                  type="password" 
+                  id="confirmPassword" 
+                  [(ngModel)]="confirmPassword" 
+                  name="confirmPassword"
+                  required 
+                  class="form-input"
+                />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-save">Cambia Password</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 3. Esporta dati -->
+          <div class="export-section">
+            <h3>Esporta Dati</h3>
+            <p class="section-subtitle">Scarica tutte le tue spese in formato CSV</p>
+            <button 
+              (click)="exportExpenses()" 
+              class="btn-save"
+            >
+              Scarica CSV
+            </button>
+          </div>
+
+          <!-- 4. Elimina account -->
+          <div class="delete-account">
+            <h3>Elimina Account</h3>
+            <p class="section-subtitle">Questa azione è irreversibile. Tutti i dati verranno eliminati permanentemente.</p>
+            <button 
+              (click)="confirmDeleteAccount()" 
+              class="btn-delete"
+            >
+              Elimina Account
+            </button>
+          </div>
+
+          <!-- 5. Notifiche email -->
+          <div class="notifications-section">
+            <h3>Notifiche Email</h3>
+            <div class="toggle-container">
+              <label class="toggle-label">
+                <input 
+                  type="checkbox" 
+                  [(ngModel)]="emailNotificationsEnabled"
+                  (change)="toggleNotifications()"
+                />
+                <span class="toggle-slider"></span>
+                Ricevi notifiche via email
+              </label>
+            </div>
+          </div>
         </div>
 
         <!-- App Info Section -->
         <div *ngIf="selectedMenu === 'app-info'" class="section">
           <h2 class="section-title">Info App</h2>
           <p class="section-subtitle">Informazioni sull'applicazione e le sue funzionalità.</p>
-          <!-- App information content would go here -->
         </div>
       </div>
     </div>
@@ -224,9 +338,18 @@ import { SupabaseService } from '../../services/supabase.service';
         margin-bottom: 1.5rem;
       }
 
-      /* Restaurant Form */
-      .restaurant-form {
+      /* Profile & Password Forms */
+      .profile-form, .password-form {
         margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #fed7aa;
+      }
+
+      .profile-form h3, .password-form h3, .export-section h3, .delete-account h3, .notifications-section h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #9a3412;
+        margin-bottom: 1rem;
       }
 
       .form-group {
@@ -257,27 +380,6 @@ import { SupabaseService } from '../../services/supabase.service';
         border-color: #f97316;
         background: white;
         box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
-      }
-
-      .color-picker-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .color-picker {
-        flex: 1;
-        height: 50px;
-        padding: 0.5rem;
-        cursor: pointer;
-      }
-
-      .color-preview {
-        width: 40px;
-        height: 40px;
-        border-radius: 0.5rem;
-        border: 2px solid #fed7aa;
-        flex-shrink: 0;
       }
 
       .form-actions {
@@ -317,7 +419,113 @@ import { SupabaseService } from '../../services/supabase.service';
         background: #e0e0e0;
       }
 
-      /* Restaurants List */
+      .btn-delete {
+        width: 100%;
+        padding: 1rem;
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-delete:hover {
+        background: #b91c1c;
+        transform: translateY(-2px);
+      }
+
+      /* Export Section */
+      .export-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #fed7aa;
+      }
+
+      /* Delete Account */
+      .delete-account {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #fed7aa;
+      }
+
+      /* Notifications Toggle */
+      .notifications-section .toggle-container {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+      }
+
+      .toggle-label {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1rem;
+        color: #333;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      .toggle-label input {
+        display: none;
+      }
+
+      .toggle-slider {
+        width: 50px;
+        height: 26px;
+        background-color: #ccc;
+        border-radius: 26px;
+        position: relative;
+        transition: background-color 0.3s;
+      }
+
+      .toggle-slider::before {
+        content: '';
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background-color: white;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.3s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+
+      .toggle-label input:checked + .toggle-slider {
+        background-color: #f97316;
+      }
+
+      .toggle-label input:checked + .toggle-slider::before {
+        transform: translateX(24px);
+      }
+
+      /* Restaurant Management (esistente) */
+      .restaurant-form {
+        margin-bottom: 2rem;
+      }
+
+      .color-picker-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .color-picker {
+        flex: 1;
+        height: 50px;
+        padding: 0.5rem;
+        cursor: pointer;
+      }
+
+      .color-preview {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.5rem;
+        border: 2px solid #fed7aa;
+        flex-shrink: 0;
+      }
+
       .restaurants-list {
         display: flex;
         flex-direction: column;
@@ -343,9 +551,6 @@ import { SupabaseService } from '../../services/supabase.service';
       }
       .restaurant-item:hover {
         background: #fff0e6;
-      }
-      .restaurant-item:last-child {
-        border-bottom: none;
       }
 
       .restaurant-info {
@@ -407,10 +612,34 @@ export class MoreComponent implements OnInit {
   restForm = { name: '', color: '#f97316' };
   editingRestaurantId: string | null = null;
 
-  selectedMenu: string = 'menu'; // Default selected menu
+  // User profile data
+  userProfile = { name: '', email: '' };
+  currentPassword = '';
+  newPassword = '';
+  confirmPassword = '';
+  emailNotificationsEnabled = false;
+
+  selectedMenu: string = 'menu';
 
   ngOnInit() {
     this.loadRestaurants();
+    this.loadUserProfile();
+  }
+
+  async loadUserProfile() {
+    const user = this.supabase.getUser();
+    if (user) {
+      this.userProfile = { 
+        name: user.user_metadata?.full_name || '', 
+        email: user.email || '' 
+      };
+      // Carica lo stato delle notifiche (da implementare nel backend)
+      this.emailNotificationsEnabled = user.user_metadata?.email_notifications || false;
+    }
+  }
+
+  selectMenu(menu: string) {
+    this.selectedMenu = menu;
   }
 
   async loadRestaurants() {
@@ -422,24 +651,94 @@ export class MoreComponent implements OnInit {
     }
   }
 
-  selectMenu(menu: string) {
-    this.selectedMenu = menu;
+  async updateProfile() {
+    try {
+      const { error } = await this.supabase.updateUserProfile(
+        this.userProfile.name, 
+        this.userProfile.email
+      );
+      if (error) throw error;
+      alert('Profilo aggiornato con successo!');
+    } catch (error: any) {
+      alert('Errore: ' + error.message);
+    }
+  }
+
+  async changePassword() {
+    if (this.newPassword !== this.confirmPassword) {
+      alert('Le password non coincidono!');
+      return;
+    }
+    try {
+      const { error } = await this.supabase.changePassword(
+        this.currentPassword, 
+        this.newPassword
+      );
+      if (error) throw error;
+      alert('Password aggiornata con successo!');
+      this.currentPassword = '';
+      this.newPassword = '';
+      this.confirmPassword = '';
+    } catch (error: any) {
+      alert('Errore: ' + error.message);
+    }
+  }
+
+  async exportExpenses() {
+    try {
+      const { data: expenses } = await this.supabase.getExpenses();
+      if (!expenses || expenses.length === 0) {
+        alert('Nessuna spesa da esportare');
+        return;
+      }
+
+      const csvContent = [
+        ['Data', 'Descrizione', 'Importo', 'Categoria', 'Ristorante'],
+        ...expenses.map(exp => [
+          new Date(exp.created_at).toLocaleDateString('it-IT'),
+          exp.description,
+          exp.amount.toFixed(2),
+          exp.category,
+          exp.description
+        ])
+      ].map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `spese_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Errore esportazione:', error);
+      alert('Errore durante l\'esportazione');
+    }
+  }
+
+  confirmDeleteAccount() {
+    if (!confirm('Sei sicuro di voler eliminare il tuo account? Questa azione è irreversibile.')) return;
+    
+    this.supabase.deleteAccount().then(() => {
+      alert('Account eliminato');
+      window.location.href = '/';
+    }).catch(error => {
+      alert('Errore: ' + error.message);
+    });
+  }
+
+  toggleNotifications() {
+    // Da implementare: salvare lo stato nel backend
+    console.log('Notifiche email:', this.emailNotificationsEnabled);
   }
 
   async addRestaurant() {
     if (!this.restForm.name.trim()) return;
-
     try {
-      const { error } = await this.supabase.addRestaurant(
-        this.restForm.name.trim(),
-        this.restForm.color
-      );
-
-      if (error) {
-        console.error('Errore aggiunta ristorante:', error);
-        return;
-      }
-
+      const { error } = await this.supabase.addRestaurant(this.restForm.name.trim(), this.restForm.color);
+      if (error) throw error;
       this.restForm = { name: '', color: '#f97316' };
       this.loadRestaurants();
     } catch (error) {
@@ -449,27 +748,16 @@ export class MoreComponent implements OnInit {
 
   startEdit(restaurant: any) {
     this.editingRestaurantId = restaurant.id;
-    this.restForm = {
-      name: restaurant.name,
-      color: restaurant.color
-    };
+    this.restForm = { name: restaurant.name, color: restaurant.color };
   }
 
   async updateRestaurant() {
     if (!this.editingRestaurantId || !this.restForm.name.trim()) return;
-
     try {
       const { error } = await this.supabase.updateRestaurant(
-        this.editingRestaurantId,
-        this.restForm.name.trim(),
-        this.restForm.color
+        this.editingRestaurantId, this.restForm.name.trim(), this.restForm.color
       );
-
-      if (error) {
-        console.error('Errore aggiornamento ristorante:', error);
-        return;
-      }
-
+      if (error) throw error;
       this.cancelEdit();
       this.loadRestaurants();
     } catch (error) {
@@ -484,13 +772,9 @@ export class MoreComponent implements OnInit {
 
   async deleteRestaurant(id: string) {
     if (!confirm('Sei sicuro di voler eliminare questo ristorante?')) return;
-
     try {
       const { error } = await this.supabase.deleteRestaurant(id);
-      if (error) {
-        console.error('Errore eliminazione ristorante:', error);
-        return;
-      }
+      if (error) throw error;
       this.loadRestaurants();
     } catch (error) {
       console.error('Errore eliminazione ristorante:', error);
