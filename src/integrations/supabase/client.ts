@@ -9,6 +9,19 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    debug: false // Disables auth debug logging to suppress 5100 invalid JWT errors
+    debug: false, // Disables verbose auth debug logging
+    autoRefreshToken: true,
+    persistSession: true
+  }
+});
+
+// Global handler for Supabase auth errors (suppresses 5100 invalid JWT errors)
+supabase.auth.onError(async (error) => {
+  if (error.code === '5100') {
+    // Silently clear invalid session data
+    await supabase.auth.signOut();
+    // Remove stale auth token from localStorage
+    const AUTH_STORAGE_KEY = 'sb-xccigtseyhdmpwdlsijv-auth-token';
+    localStorage.removeItem(AUTH_STORAGE_KEY);
   }
 });
