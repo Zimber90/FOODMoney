@@ -23,11 +23,13 @@ export class SupabaseService {
     try {
       const { data, error } = await supabase.auth.getSession();
       if (error) {
-        console.error('Session initialization error:', error);
-        // Handle invalid/expired JWT (Supabase error code 5100)
+        // Suppress noisy log for known invalid/expired JWT error (code 5100)
         if (error.code === '5100') {
           await supabase.auth.signOut();
+          this._user.next(null);
+          return;
         }
+        console.error('Session initialization error:', error);
         this._user.next(null);
       } else {
         this._user.next(data.session?.user ?? null);
