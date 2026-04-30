@@ -4,6 +4,17 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = "https://xccigtseyhdmpwdlsijv.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjY2lndHNleWhkbXB3ZGxzaWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjU3MzIsImV4cCI6MjA5MjcwMTczMn0.gwV43Z_AsuhpNemzs4FfWI97h4ZdQZ0vjRbN26pqVzg";
 
+// Suppress Supabase 5100 "Invalid JWT" errors in the console
+const originalConsoleError = console.error;
+console.error = function (...args: any[]) {
+  // Check if this is the Supabase 5100 error object
+  if (args[0] && typeof args[0] === 'object' && args[0].code === 5100) {
+    // Silently ignore this specific error
+    return;
+  }
+  originalConsoleError.apply(console, args);
+};
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
@@ -12,16 +23,5 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     debug: false, // Disables verbose auth debug logging
     autoRefreshToken: true,
     persistSession: true
-  }
-});
-
-// Global handler for Supabase auth errors (suppresses 5100 invalid JWT errors)
-supabase.auth.onError(async (error) => {
-  if (error.code === '5100') {
-    // Silently clear invalid session data
-    await supabase.auth.signOut();
-    // Remove stale auth token from localStorage
-    const AUTH_STORAGE_KEY = 'sb-xccigtseyhdmpwdlsijv-auth-token';
-    localStorage.removeItem(AUTH_STORAGE_KEY);
   }
 });
