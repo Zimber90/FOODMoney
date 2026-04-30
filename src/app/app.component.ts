@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SupabaseService } from './services/supabase.service';
+import { AuthComponent } from './pages/auth/auth.component';
 import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, BrowserAnimationsModule],
+  imports: [CommonModule, RouterModule, BrowserAnimationsModule, AuthComponent],
   animations: [
     trigger('routeTransition', [
       transition(':enter', [
