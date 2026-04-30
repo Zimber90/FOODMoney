@@ -22,6 +22,7 @@ import { SupabaseService } from '../../services/supabase.service';
       justify-content: center;
       min-height: 100vh;
       padding: 0 1rem;
+      background: #fff7ed;
     }
 
     .logo-wrapper {

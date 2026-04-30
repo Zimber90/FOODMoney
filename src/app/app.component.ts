@@ -21,7 +21,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
     ])
   ],
   template: `
-    <div @routeTransition>
+    <div class="app-container" @routeTransition>
       <ng-container *ngIf="supabase.user$ | async; else login">
         <div class="page-content">
           <router-outlet></router-outlet>
@@ -72,8 +72,16 @@ import { animate, style, transition, trigger } from '@angular/animations';
     </div>
   `,
   styles: [`
-    main { min-height: 100vh; background: #ffffff; display: flex; flex-direction: column; }
-    .page-content { flex: 1; padding-bottom: 80px; }
+    .app-container {
+      min-height: 100vh;
+      background: #fff7ed;
+      display: flex;
+      flex-direction: column;
+    }
+    .page-content {
+      flex: 1;
+      padding-bottom: 80px;
+    }
     .bottom-nav {
       display: flex; justify-content: space-around; align-items: center;
       padding: 0.75rem 1rem; background: #ffffff; border-top: 1px solid #e9ecef;
