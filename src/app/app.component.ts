@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SupabaseService } from './services/supabase.service';
 import { AuthComponent } from './components/auth/auth.component';
+import { LucideIconComponent } from 'lucide-angular';
 import { Home, Calendar, ScrollText, BarChart, MoreHorizontal } from 'lucide-angular';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, AuthComponent, RouterModule, Home, Calendar, ScrollText, BarChart, MoreHorizontal],
+  imports: [CommonModule, AuthComponent, RouterModule, LucideIconComponent],
   template: `
     <main>
       <ng-container *ngIf="supabase.user$ | async; else login">
@@ -18,11 +19,11 @@ import { Home, Calendar, ScrollText, BarChart, MoreHorizontal } from 'lucide-ang
         <nav class="bottom-nav">
           <a *ngFor="let item of navItems" [routerLink]="item.link" class="nav-item">
             <span class="nav-icon">
-              <lucide-home *ngIf="item.link === '/'" size="22"></lucide-home>
-              <lucide-calendar *ngIf="item.link === '/calendar'" size="22"></lucide-calendar>
-              <lucide-scroll-text *ngIf="item.link === '/history'" size="22"></lucide-scroll-text>
-              <lucide-bar-chart *ngIf="item.link === '/stats'" size="22"></lucide-bar-chart>
-              <lucide-more-horizontal *ngIf="item.link === '/more'" size="22"></lucide-more-horizontal>
+              <lucide-icon *ngIf="item.link === '/'" [icon]="homeIcon" [size]="22"></lucide-icon>
+              <lucide-icon *ngIf="item.link === '/calendar'" [icon]="calendarIcon" [size]="22"></lucide-icon>
+              <lucide-icon *ngIf="item.link === '/history'" [icon]="scrollTextIcon" [size]="22"></lucide-icon>
+              <lucide-icon *ngIf="item.link === '/stats'" [icon]="barChartIcon" [size]="22"></lucide-icon>
+              <lucide-icon *ngIf="item.link === '/more'" [icon]="moreHorizontalIcon" [size]="22"></lucide-icon>
             </span>
             <span class="nav-label">{{ item.label }}</span>
           </a>
@@ -41,7 +42,7 @@ import { Home, Calendar, ScrollText, BarChart, MoreHorizontal } from 'lucide-ang
       flex-direction: column;
     }
     .page-content {
-      flex: 1;
+      flex:1;
       padding-bottom: 80px;
     }
     .bottom-nav {
@@ -94,4 +95,11 @@ export class AppComponent {
     { label: 'Statistiche', link: '/stats' },
     { label: 'Altro', link: '/more' }
   ];
+
+  // Dati icone
+  homeIcon = Home;
+  calendarIcon = Calendar;
+  scrollTextIcon = ScrollText;
+  barChartIcon = BarChart;
+  moreHorizontalIcon = MoreHorizontal;
 }
