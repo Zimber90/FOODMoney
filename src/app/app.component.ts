@@ -42,7 +42,7 @@ import { Home, Calendar, ScrollText, BarChart, MoreHorizontal } from 'lucide-ang
       flex-direction: column;
     }
     .page-content {
-      flex:1;
+      flex: 1;
       padding-bottom: 80px;
     }
     .bottom-nav {
@@ -96,7 +96,7 @@ export class AppComponent {
     { label: 'Altro', link: '/more' }
   ];
 
-  // Dati icone
+  // Icon data for LucideIconComponent inputs
   homeIcon = Home;
   calendarIcon = Calendar;
   scrollTextIcon = ScrollText;
