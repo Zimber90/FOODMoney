@@ -11,8 +11,6 @@ import { SupabaseService } from '../../services/supabase.service';
       <div class="logo-container">
         <img src="assets/foodmoney512.png" alt="FoodMoney Logo" class="logo" />
       </div>
-      <h1 class="home-title">FoodMoney</h1>
-      <p class="home-description">Gestisci le tue spese quotidiane</p>
     </div>
   `,
   styles: [`
@@ -35,22 +33,6 @@ import { SupabaseService } from '../../services/supabase.service';
       height: auto;
       border-radius: 1rem;
       box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.2);
-    }
-
-    .home-title {
-      color: #9a3412;
-      font-size: 2.5rem;
-      font-weight: 800;
-      margin: 0.5rem 0;
-      text-align: center;
-    }
-
-    .home-description {
-      color: #9a3412;
-      opacity: 0.7;
-      font-size: 1rem;
-      text-align: center;
-      margin-bottom: 2rem;
     }
   `]
 })
