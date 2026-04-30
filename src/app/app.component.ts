@@ -4,13 +4,7 @@ import { RouterModule } from '@angular/router';
 import { SupabaseService } from './services/supabase.service';
 import { AuthComponent } from './components/auth/auth.component';
 import { LucideIconsModule } from 'lucide-angular';
-import {
-  Home as HomeIcon,
-  Calendar as CalendarIcon,
-  ScrollText as ScrollTextIcon,
-  BarChart as BarChartIcon,
-  MoreHorizontal as MoreHorizontalIcon
-} from 'lucide-angular';
+import { Home, Calendar, ScrollText, BarChart, MoreHorizontal } from 'lucide-angular';
 
 @Component({
   selector: 'app-root',
@@ -67,9 +61,9 @@ export class AppComponent {
     { label: 'Statistiche', link: '/stats' },
     { label: 'Altro', link: '/more' }
   ];
-  homeIcon = HomeIcon;
-  calendarIcon = CalendarIcon;
-  scrollTextIcon = ScrollTextIcon;
-  barChartIcon = BarChartIcon;
-  moreHorizontalIcon = MoreHorizontalIcon;
+  homeIcon = Home;
+  calendarIcon = Calendar;
+  scrollTextIcon = ScrollText;
+  barChartIcon = BarChart;
+  moreHorizontalIcon = MoreHorizontal;
 }
