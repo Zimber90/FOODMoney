@@ -1,15 +1,27 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SupabaseService } from './services/supabase.service';
-import { AuthComponent } from './components/auth/auth.component';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, AuthComponent, RouterModule],
+  imports: [CommonModule, RouterModule, BrowserAnimationsModule],
+  animations: [
+    trigger('routeTransition', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.95)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'scale(1)' }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-out', style({ opacity: 0, transform: 'scale(0.95)' }))
+      ])
+    ])
+  ],
   template: `
-    <main>
+    <div @routeTransition>
       <ng-container *ngIf="supabase.user$ | async; else login">
         <div class="page-content">
           <router-outlet></router-outlet>
@@ -18,7 +30,7 @@ import { AuthComponent } from './components/auth/auth.component';
           <a *ngFor="let item of navItems" [routerLink]="item.link" class="nav-item">
             <span class="nav-icon">
               <!-- Home icon -->
-              <svg *ngIf="item.link === '/'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+              <svg *ngIf="item.link === '/' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
@@ -57,7 +69,7 @@ import { AuthComponent } from './components/auth/auth.component';
       <ng-template #login>
         <app-auth></app-auth>
       </ng-template>
-    </main>
+    </div>
   `,
   styles: [`
     main { min-height: 100vh; background: #ffffff; display: flex; flex-direction: column; }
