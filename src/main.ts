@@ -3,6 +3,18 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { supabase } from './integrations/supabase/client';
 
+// Clear any stale Supabase auth data from localStorage
+const SUPABASE_PROJECT_REF = 'xccigtseyhdmpwdlsijv';
+const AUTH_STORAGE_KEY = `sb-${SUPABASE_PROJECT_REF}-auth-token`;
+localStorage.removeItem(AUTH_STORAGE_KEY);
+
+// Also remove any other Supabase-related keys (optional)
+Object.keys(localStorage).forEach(key => {
+  if (key.startsWith('sb-') || key.includes('supabase')) {
+    localStorage.removeItem(key);
+  }
+});
+
 // Ensure any invalid/expired JWT is cleared before the app boots
 (async () => {
   try {
