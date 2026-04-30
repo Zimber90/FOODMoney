@@ -4,19 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = "https://xccigtseyhdmpwdlsijv.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjY2lndHNleWhkbXB3ZGxzaWp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjU3MzIsImV4cCI6MjA5MjcwMTczMn0.gwV43Z_AsuhpNemzs4FfWI97h4ZdQZ0vjRbN26pqVzg";
 
-// Suppress Supabase 5100 "Invalid JWT" errors in the console
-const originalConsoleError = console.error;
-console.error = function (...args: any[]) {
-  // Check if any argument is an object with code 5100 (number or string)
-  const is5100Error = args.some(arg => 
-    arg && typeof arg === 'object' && (arg.code === 5100 || arg.code === '5100')
-  );
-  if (is5100Error) {
-    return; // silently ignore
-  }
-  originalConsoleError.apply(console, args);
-};
-
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
