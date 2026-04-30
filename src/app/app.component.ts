@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SupabaseService } from './services/supabase.service';
-import { AuthComponent } from './pages/auth/auth.component';
+import { AuthComponent } from './components/auth/auth.component';
 import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
