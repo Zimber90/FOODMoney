@@ -2,6 +2,8 @@ import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideServiceWorker } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 import { HomeComponent } from './pages/home/home.component';
 import { CalendarComponent } from './pages/calendar/calendar.component';
 import { HistoryComponent } from './pages/history/history.component';
@@ -21,6 +23,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     importProvidersFrom(BrowserModule),
     provideRouter(routes),
-    provideAnimations()
+    provideAnimations(),
+    // Il service worker è attivo solo in produzione
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: true,
+      registrationStrategy: 'registerWhenStable:30000'
+    })
   ]
 };
