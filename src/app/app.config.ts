@@ -1,4 +1,5 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home.component';
 import { CalendarComponent } from './pages/calendar/calendar.component';
@@ -16,5 +17,8 @@ const routes: Routes = [
 ];
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes)]
+  providers: [
+    importProvidersFrom(BrowserModule),
+    provideRouter(routes)
+  ]
 };
