@@ -1,15 +1,14 @@
-"use client";
-
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SupabaseService } from './services/supabase.service';
 import { AuthComponent } from './components/auth/auth.component';
+import { Home, Calendar, ScrollText, BarChart, MoreHorizontal } from 'lucide-angular';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, AuthComponent, RouterModule],
+  imports: [CommonModule, AuthComponent, RouterModule, Home, Calendar, ScrollText, BarChart, MoreHorizontal],
   template: `
     <main>
       <ng-container *ngIf="supabase.user$ | async; else login">
@@ -18,7 +17,13 @@ import { AuthComponent } from './components/auth/auth.component';
         </div>
         <nav class="bottom-nav">
           <a *ngFor="let item of navItems" [routerLink]="item.link" class="nav-item">
-            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="nav-icon">
+              <lucide-home *ngIf="item.link === '/'" size="22"></lucide-home>
+              <lucide-calendar *ngIf="item.link === '/calendar'" size="22"></lucide-calendar>
+              <lucide-scroll-text *ngIf="item.link === '/history'" size="22"></lucide-scroll-text>
+              <lucide-bar-chart *ngIf="item.link === '/stats'" size="22"></lucide-bar-chart>
+              <lucide-more-horizontal *ngIf="item.link === '/more'" size="22"></lucide-more-horizontal>
+            </span>
             <span class="nav-label">{{ item.label }}</span>
           </a>
         </nav>
@@ -37,7 +42,7 @@ import { AuthComponent } from './components/auth/auth.component';
     }
     .page-content {
       flex: 1;
-      padding-bottom: 80px; /* spazio per la navbar */
+      padding-bottom: 80px;
     }
     .bottom-nav {
       display: flex;
@@ -62,8 +67,13 @@ import { AuthComponent } from './components/auth/auth.component';
       transition: color 0.2s;
       min-width: 48px;
     }
-    .nav-item .nav-icon { font-size: 1.35rem; line-height: 1; }
-    .nav-item .nav-label {
+    .nav-icon {
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-label {
       font-size: 0.7rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -71,17 +81,17 @@ import { AuthComponent } from './components/auth/auth.component';
     }
     .nav-item:hover { color: #f97316; }
     @media (max-width: 768px) {
-      .nav-item .nav-label { font-size: 0.65rem; }
+      .nav-label { font-size: 0.65rem; }
     }
   `]
 })
 export class AppComponent {
   supabase = inject(SupabaseService);
   navItems = [
-    { icon: '🏠', label: 'Home', link: '/' },
-    { icon: '📅', label: 'Calendario', link: '/calendar' },
-    { icon: '📜', label: 'Storico', link: '/history' },
-    { icon: '📊', label: 'Statistiche', link: '/stats' },
-    { icon: '⋮', label: 'Altro', link: '/more' }
+    { label: 'Home', link: '/' },
+    { label: 'Calendario', link: '/calendar' },
+    { label: 'Storico', link: '/history' },
+    { label: 'Statistiche', link: '/stats' },
+    { label: 'Altro', link: '/more' }
   ];
 }
