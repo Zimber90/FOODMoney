@@ -1,1 +1,217 @@
-import { Component, inject, OnInit } from '@angular/core'; import { CommonModule } from '@angular/common'; import { FormsModule } from '@angular/forms'; import { SupabaseService } from '../../services/supabase.service'; @Component({ selector: 'app-stats', standalone: true, imports: [CommonModule, FormsModule], template: ` <div class="stats-page"> <h1 class="page-title">Statistiche</h1> <div class="total-spent"> <p>Spesa totale: <strong>€ {{ totalSpent | number:'1.2-2' }}</strong></p> </div> <div class="search-container"> <input type="text" placeholder="Cerca ristorante..." (input)="onSearch($event)" class="search-input" /> </div> <div class="orders-header"> <h2 class="section-title">Ordini recenti</h2> <span class="filter-icon" title="Ordina per data" (click)="dropdownOpen = !dropdownOpen;"></span> <select class="sort-select" (change)="handleSortChange"> <option [value]="'newest'" [selected]="sortOption === 'newest'">Più recenti</option> <option [value]="'oldest'" [selected]="sortOption === 'oldest'">Più vecchi</option> </select> </div> <div class="expenses-list"> <h2 class="section-title">Ordini recenti</h2> <div *ngIf="filteredExpenses.length === 0" class="empty-state">Nessun ordine trovato</div> <div *ngFor="let expense of filteredExpenses" class="expense-item"> <span class="expense-date">{{ expense.created_at | date:'dd/MM' }}</span> <span class="expense-restaurant">{{ expense.description }}</span> <span class="expense-amount">€ {{ expense.amount | number:'1.2-2' }}</span> </div> </div> </div> `, styles: [`.stats-page { padding: 2rem 1rem; min-height: calc(100vh - 80px); background: #fff7ed; display: flex; flex-direction: column; align-items: center; } .page-title { text-align: center; font-size: 2rem; font-weight: 800; color: #9a3412; margin-bottom: 1.5rem; } .total-spent { background: white; padding: 1rem 2rem; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1); margin-bottom: 2rem; width: 100%; max-width: 400px; text-align: center; } .total-spent strong { color: #f97316; } .search-container { width: 100%; max-width: 400px; margin-bottom: 1.5rem; } .search-input { width: 100%; padding: 1rem; border: 2px solid #fed7aa; border-radius: 1rem; font-size: 1rem; outline: none; transition: all 0.2s; background: #fffcf9; } .search-input:focus { border-color: #f97316; background: white; box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); } .expenses-list { width: 100%; max-width: 400px; } .section-title { font-size: 1.25rem; font-weight: 700; color: #9a3412; margin-bottom: 0.5rem; } .expense-item { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #fed7aa; } .expense-item:last-child { border-bottom: none; } .expense-date { font-size: 0.85rem; color: #666; } .expense-restaurant { font-weight: 500; color: #333; } .expense-amount { font-weight: 700; color: #9a3412; } .empty-state { text-align: center; color: #9a3412; opacity: 0.6; padding: 2rem 0; font-size: 0.95rem; } .orders-header { display: flex; align-items: center; margin-bottom: 1rem; } .filter-icon { font-size: 1.2rem; margin-left: 0.5rem; cursor: pointer; } .sort-select { margin-left: 0.5rem; padding: 0.2rem 0.5rem; border: 1px solid #fed7aa; border-radius: 0.5rem; background: white; font-size: 0.9rem; } @media (max-width: 768px) { .total-spent, .search-container, .expenses-list { max-width: 90%; } }`] }) export class StatsComponent implements OnInit { private supabase = inject(SupabaseService); loading = true; filteredExpenses: any[] = []; totalSpent = 0; allExpenses: any[] = []; sortOption: 'newest' | 'oldest' = 'newest'; dropdownOpen = false; ngOnInit() { this.loadExpenses(); } async loadExpenses() { try { const { data, error } = await this.supabase.getExpenses(); if (error) throw error; this.allExpenses = data || []; this.filteredExpenses = [...this.allExpenses]; this.sortExpenses(); } catch (err) { console.error('Errore caricamento spese:', err); } finally { this.loading = false; } } sortExpenses() { this.filteredExpenses = this.allExpenses.slice().sort((a, b) => { const dateA = new Date(a.created_at); const dateB = new Date(b.created_at); if (this.sortOption === 'newest') { return dateB.getTime() - dateA.getTime(); } else { return dateA.getTime() - dateB.getTime(); } }); } handleSortChange(event: Event) { const value = (event.target as HTMLSelectElement).value; this.sortOption = value; this.sortExpenses(); } onSearch(event: Event) { const input = event.target as HTMLInputElement; const query = input.value.toLowerCase(); this.filteredExpenses = this.allExpenses.filter(exp => exp.description.toLowerCase().includes(query)); this.sortExpenses(); } }
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SupabaseService } from '../../services/supabase.service';
+
+@Component({
+  selector: 'app-stats',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <div class="stats-page">
+      <h1 class="page-title">Statistiche</h1>
+      
+      <div class="total-spent">
+        <p>Spesa totale: <strong>€ {{ totalSpent | number:'1.2-2' }}</strong></p>
+      </div>
+            <div class="search-container">
+        <input
+          type="text"
+          placeholder="Cerca ristorante..."
+          (input)="onSearch($event)"
+          class="search-input"
+        />
+      </div>
+            <div class="orders-header">
+        <h2 class="section-title">Ordini recenti</h2>
+        <span class="filter-icon" title="Ordina per data" (click)="dropdownOpen = !dropdownOpen;"></span>
+        <select class="sort-select" (change)="handleSortChange">
+          <option [value]="'newest'" [selected]="sortOption === 'newest'">Più recenti</option>
+          <option [value]="'oldest'" [selected]="sortOption === 'oldest'">Più vecchi</option>
+        </select>
+      </div>
+      
+      <div class="expenses-list">
+        <h2 class="section-title">Ordini recenti</h2>
+        <div *ngIf="filteredExpenses.length === 0" class="empty-state">
+          Nessun ordine trovato
+        </div>
+        <div *ngFor="let expense of filteredExpenses" class="expense-item">
+          <span class="expense-date">{{ expense.created_at | date:'dd/MM' }}</span>
+          <span class="expense-restaurant">{{ expense.description }}</span>
+          <span class="expense-amount">€ {{ expense.amount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .stats-page {
+      padding: 2rem 1rem;
+      min-height: calc(100vh - 80px);
+      background: #fff7ed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .page-title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #9a3412;
+      margin-bottom: 1.5rem;
+    }
+    .total-spent {
+      background: white;
+      padding: 1rem 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1);
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .total-spent strong {
+      color: #f97316;
+    }
+    .search-container {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 1.5rem;
+    }
+    .search-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #fed7aa;
+      border-radius: 1rem;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+      background: #fffcf9;
+    }
+    .search-input:focus {
+      border-color: #f97316;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+    .expenses-list {
+      width: 100%;
+      max-width: 400px;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #9a3412;
+      margin-bottom: 0.5rem;
+    }
+    .expense-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #fed7aa;
+    }
+    .expense-item:last-child {
+      border-bottom: none;
+    }
+    .expense-date {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .expense-restaurant {
+      font-weight: 500;
+      color: #333;
+    }
+    .expense-amount {
+      font-weight: 700;
+      color: #9a3412;
+    }
+    .empty-state {
+      text-align: center;
+      color: #9a3412;
+      opacity: 0.6;
+      padding: 2rem 0;
+      font-size: 0.95rem;
+    }
+    .orders-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .filter-icon {
+      font-size: 1.2rem;
+      margin-left: 0.5rem;
+      cursor: pointer;
+    }
+    .sort-select {
+      margin-left: 0.5rem;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid #fed7aa;
+      border-radius: 0.5rem;
+      background: white;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 768px) {
+      .total-spent,
+      .search-container,
+      .expenses-list {
+        max-width: 90%;
+      }
+    }
+  `]
+})
+export class StatsComponent implements OnInit {
+  private supabase = inject(SupabaseService);
+  loading = true;
+  filteredExpenses: any[] = [];
+  totalSpent = 0;
+  allExpenses: any[] = [];
+  sortOption: 'newest' | 'oldest' = 'newest';
+  dropdownOpen = false;
+
+  ngOnInit() {
+    this.loadExpenses();
+  }
+
+  async loadExpenses() {
+    try {
+      const { data, error } = await this.supabase.getExpenses();
+      if (error) throw error;
+      this.allExpenses = data || [];
+      this.filteredExpenses = [...this.allExpenses];
+      this.sortExpenses();
+    } catch (err) {
+      console.error('Errore caricamento spese:', err);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  calculateTotalSpent() {
+    this.totalSpent = this.filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }
+
+  sortExpenses() {
+    this.filteredExpenses = this.allExpenses.slice().sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+      if (this.sortOption === 'newest') {
+        return dateB.getTime() - dateA.getTime();
+      } else {
+        return dateA.getTime() - dateB.getTime();
+      }
+    });
+    this.calculateTotalSpent();
+  }
+
+  handleSortChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    // Cast the value to the correct type
+    this.sortOption = select.value as 'newest' | 'oldest';
+  }
+
+  onSearch(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const query = input.value.toLowerCase();
+    this.filteredExpenses = this.allExpenses.filter(exp => exp.description.toLowerCase().includes(query));
+    this.sortExpenses();
+  }
+}
