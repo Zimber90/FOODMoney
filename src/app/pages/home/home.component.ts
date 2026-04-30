@@ -15,28 +15,16 @@ import { SupabaseService } from '../../services/supabase.service';
       <h1 class="home-title">FoodMoney</h1>
       <p class="home-description">Gestisci le tue spese quotidiane</p>
 
-      <div class="orders-list" *ngIf="orders.length > 0">
-        <h2 class="orders-title">Ordini recenti</h2>
-        <div *ngFor="let order of orders" class="order-item">
-          <div class="order-info">
-            <span class="order-date">{{ order.created_at | date:'dd/MM' }}</span>
-            <span class="order-restaurant">{{ order.description }}</span>
-            <span class="order-amount">€ {{ order.amount | number:'1.2-2' }}</span>
-          </div>
-          <div class="order-actions">
-            <button class="edit-btn" (click)="openEditPopup(order)">✏️</button>
-            <button class="delete-btn" (click)="deleteOrder(order.id)">🗑️</button>
-          </div>
-        </div>
-      </div>
-
-      <button class="create-btn" (click)="openOrderPopup()"> + Crea Ordine </button>
+      <button class="create-btn" (click)="openOrderPopup()">
+        + Crea Ordine
+      </button>
 
       <!-- Order creation popup -->
       <div *ngIf="isOrderPopupOpen" class="popup-overlay" (click)="closeOrderPopup()">
         <div class="popup-modal" (click)="$event.stopPropagation()">
           <h2 class="popup-title">Crea Ordine</h2>
-                    <form (ngSubmit)="saveOrder()" #orderFormRef="ngForm">
+          
+          <form (ngSubmit)="saveOrder()" #orderFormRef="ngForm">
             <div class="form-group">
               <label for="ristorante">Ristorante</label>
               <select
@@ -76,7 +64,8 @@ import { SupabaseService } from '../../services/supabase.service';
             
             <div class="form-group">
               <label for="importo">Importo</label>
-              <input                type="number"
+              <input
+                type="number"
                 id="importo"
                 name="importo"
                 [(ngModel)]="orderForm.importo"
@@ -107,15 +96,18 @@ import { SupabaseService } from '../../services/supabase.service';
       min-height: calc(100vh - 80px);
       background: #fff7ed;
     }
+
     .logo-container {
       margin-bottom: 1.5rem;
     }
+
     .logo {
       width: 250px;
       height: auto;
       border-radius: 1rem;
       box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.2);
     }
+
     .home-title {
       color: #9a3412;
       font-size: 2.5rem;
@@ -123,6 +115,7 @@ import { SupabaseService } from '../../services/supabase.service';
       margin: 0.5rem 0;
       text-align: center;
     }
+
     .home-description {
       color: #9a3412;
       opacity: 0.7;
@@ -130,58 +123,7 @@ import { SupabaseService } from '../../services/supabase.service';
       text-align: center;
       margin-bottom: 2rem;
     }
-    .orders-list {
-      margin-bottom: 2rem;
-    }
-    .orders-title {
-      color: #9a3412;
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-    .order-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 0;
-      border-bottom: 1px solid #fed7aa;
-    }
-    .order-item:last-child {
-      border-bottom: none;
-    }
-    .order-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    .order-date {
-      font-size: 0.85rem;
-      color: #666;
-    }
-    .order-restaurant {
-      font-weight: 500;
-      color: #333;
-    }
-    .order-amount {
-      font-weight: 700;
-      color: #9a3412;
-      text-align: right;
-    }
-    .order-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-    .edit-btn, .delete-btn {
-      background: none;
-      border: none;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .edit-btn:hover, .delete-btn:hover {
-      transform: scale(1.1);
-    }
+
     .create-btn {
       padding: 1rem 2rem;
       background: #f97316;
@@ -193,11 +135,13 @@ import { SupabaseService } from '../../services/supabase.service';
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .create-btn:hover {
       background: #ea580c;
       transform: translateY(-2px);
       box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
     }
+
     /* Popup styles */
     .popup-overlay {
       position: fixed;
@@ -211,6 +155,7 @@ import { SupabaseService } from '../../services/supabase.service';
       justify-content: center;
       z-index: 102;
     }
+
     .popup-modal {
       background: white;
       border-radius: 2rem;
@@ -219,6 +164,7 @@ import { SupabaseService } from '../../services/supabase.service';
       max-width: 400px;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
+
     .popup-title {
       text-align: center;
       color: #9a3412;
@@ -226,9 +172,11 @@ import { SupabaseService } from '../../services/supabase.service';
       font-weight: 800;
       margin-bottom: 1.5rem;
     }
+
     .form-group {
       margin-bottom: 1.25rem;
     }
+
     .form-group label {
       display: block;
       font-size: 0.75rem;
@@ -238,6 +186,7 @@ import { SupabaseService } from '../../services/supabase.service';
       margin-bottom: 0.5rem;
       margin-left: 0.5rem;
     }
+
     .form-input {
       width: 100%;
       padding: 1rem;
@@ -248,11 +197,13 @@ import { SupabaseService } from '../../services/supabase.service';
       transition: all 0.2s;
       background: #fffcf9;
     }
+
     .form-input:focus {
       border-color: #f97316;
       background: white;
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
+
     .selected-color {
       display: flex;
       align-items: center;
@@ -262,6 +213,7 @@ import { SupabaseService } from '../../services/supabase.service';
       color: #9a3412;
       margin-left: 0.5rem;
     }
+
     .color-swatch {
       display: inline-block;
       width: 16px;
@@ -269,12 +221,14 @@ import { SupabaseService } from '../../services/supabase.service';
       border-radius: 4px;
       flex-shrink: 0;
     }
+
     .popup-actions {
       display: flex;
       justify-content: space-between;
       margin-top: 2rem;
       gap: 1rem;
     }
+
     .btn-close {
       flex: 1;
       padding: 1rem;
@@ -286,9 +240,11 @@ import { SupabaseService } from '../../services/supabase.service';
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .btn-close:hover {
       background: #e0e0e0;
     }
+
     .btn-save {
       flex: 1;
       padding: 1rem;
@@ -300,25 +256,27 @@ import { SupabaseService } from '../../services/supabase.service';
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .btn-save:hover {
       background: #ea580c;
       transform: translateY(-2px);
     }
+
     @media (max-width: 768px) {
       .home-container {
         padding: 1.5rem;
       }
+
       .logo {
         width: 200px;
       }
+
       .home-title {
         font-size: 2rem;
       }
+
       .home-description {
         font-size: 0.9rem;
-      }
-      .orders-list {
-        max-width: 90%;
       }
     }
   `]
@@ -328,12 +286,10 @@ export class HomeComponent implements OnInit {
   orderForm = { restaurantId: '', data: '', importo: 0 };
   selectedRestaurantColor = '';
   supabase = inject(SupabaseService);
-  orders: any[] = [];
   restaurants: any[] = [];
 
   ngOnInit() {
     this.loadRestaurants();
-    this.loadOrders();
   }
 
   async loadRestaurants() {
@@ -342,16 +298,6 @@ export class HomeComponent implements OnInit {
       this.restaurants = data || [];
     } catch (error) {
       console.error('Errore caricamento ristoranti:', error);
-    }
-  }
-
-  async loadOrders() {
-    try {
-      const { data, error } = await this.supabase.getExpenses();
-      if (error) throw error;
-      this.orders = data || [];
-    } catch (error) {
-      console.error('Errore caricamento ordini:', error);
     }
   }
 
@@ -393,27 +339,8 @@ export class HomeComponent implements OnInit {
       }
 
       this.closeOrderPopup();
-      this.loadOrders(); // Refresh orders after adding
     } catch (error) {
       console.error('Errore nel salvataggio ordine:', error);
-    }
-  }
-
-  async openEditPopup(order: any) {
-    // Implementa la logica per modificare un ordine
-    // Esempio: apri un popup di modifica con i dati dell'ordine
-    console.log('Modifica ordine:', order);
-  }
-
-  async deleteOrder(id: string) {
-    if (!confirm('Sei sicuro di voler eliminare questo ordine?')) return;
-    
-    try {
-      const { error } = await this.supabase.deleteExpense(id);
-      if (error) throw error;
-      this.loadOrders(); // Refresh orders after deletion
-    } catch (error) {
-      console.error('Errore eliminazione ordine:', error);
     }
   }
 }
