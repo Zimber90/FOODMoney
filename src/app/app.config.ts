@@ -1,5 +1,4 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { ApplicationConfig } from '@angular/core';
 import { provideRouter, Routes } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -21,12 +20,10 @@ const routes: Routes = [
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    importProvidersFrom(BrowserModule),
     provideRouter(routes),
     provideAnimations(),
-    // Il service worker è attivo solo in produzione
     provideServiceWorker('ngsw-worker.js', {
-      enabled: true,
+      enabled: environment.production,
       registrationStrategy: 'registerWhenStable:30000'
     })
   ]
