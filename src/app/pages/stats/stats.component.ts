@@ -14,7 +14,8 @@ import { SupabaseService } from '../../services/supabase.service';
       <div class="total-spent">
         <p>Spesa totale: <strong>€ {{ totalSpent | number:'1.2-2' }}</strong></p>
       </div>
-            <div class="search-container">
+      
+      <div class="search-container">
         <input
           type="text"
           placeholder="Cerca ristorante..."
@@ -22,17 +23,40 @@ import { SupabaseService } from '../../services/supabase.service';
           class="search-input"
         />
       </div>
-            <div class="orders-header">
+      
+      <div class="orders-header">
         <h2 class="section-title">Ordini recenti</h2>
-        <span class="filter-icon" title="Ordina per data" (click)="dropdownOpen = !dropdownOpen;"></span>
-        <select class="sort-select" (change)="handleSortChange">
-          <option [value]="'newest'" [selected]="sortOption === 'newest'">Più recenti</option>
-          <option [value]="'oldest'" [selected]="sortOption === 'oldest'">Più vecchi</option>
-        </select>
+        <div class="filter-container">
+          <!-- Icona a 3 linee (come da allegato) -->
+          <span class="filter-icon" (click)="dropdownOpen = !dropdownOpen;" title="Ordina per data">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#9a3412" stroke-width="2" stroke-linecap="round">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </span>
+          
+          <!-- Menu a discesa filtri -->
+          <div class="filter-dropdown" *ngIf="dropdownOpen">
+            <div 
+              class="dropdown-item" 
+              [class.active]="sortOption === 'newest'"
+              (click)="setSortOption('newest')"
+            >
+              Più recenti
+            </div>
+            <div 
+              class="dropdown-item" 
+              [class.active]="sortOption === 'oldest'"
+              (click)="setSortOption('oldest')"
+            >
+              Più vecchi
+            </div>
+          </div>
+        </div>
       </div>
       
       <div class="expenses-list">
-        <h2 class="section-title">Ordini recenti</h2>
         <div *ngIf="filteredExpenses.length === 0" class="empty-state">
           Nessun ordine trovato
         </div>
@@ -53,6 +77,7 @@ import { SupabaseService } from '../../services/supabase.service';
       flex-direction: column;
       align-items: center;
     }
+    
     .page-title {
       text-align: center;
       font-size: 2rem;
@@ -60,6 +85,7 @@ import { SupabaseService } from '../../services/supabase.service';
       color: #9a3412;
       margin-bottom: 1.5rem;
     }
+    
     .total-spent {
       background: white;
       padding: 1rem 2rem;
@@ -70,14 +96,17 @@ import { SupabaseService } from '../../services/supabase.service';
       max-width: 400px;
       text-align: center;
     }
+    
     .total-spent strong {
       color: #f97316;
     }
+    
     .search-container {
       width: 100%;
       max-width: 400px;
       margin-bottom: 1.5rem;
     }
+    
     .search-input {
       width: 100%;
       padding: 1rem;
@@ -88,42 +117,113 @@ import { SupabaseService } from '../../services/supabase.service';
       transition: all 0.2s;
       background: #fffcf9;
     }
+    
     .search-input:focus {
       border-color: #f97316;
       background: white;
       box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
     }
-    .expenses-list {
+    
+    .orders-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       width: 100%;
       max-width: 400px;
+      margin-bottom: 1rem;
     }
+    
     .section-title {
       font-size: 1.25rem;
       font-weight: 700;
       color: #9a3412;
-      margin-bottom: 0.5rem;
+      margin: 0;
     }
+    
+    .filter-container {
+      position: relative;
+    }
+    
+    .filter-icon {
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      border-radius: 0.5rem;
+      transition: background 0.2s;
+    }
+    
+    .filter-icon:hover {
+      background: #fed7aa;
+    }
+    
+    .filter-dropdown {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      right: 0;
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      min-width: 140px;
+      overflow: hidden;
+      border: 1px solid #fed7aa;
+    }
+    
+    .dropdown-item {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .dropdown-item:hover {
+      background: #fff7ed;
+    }
+    
+    .dropdown-item.active {
+      color: #f97316;
+      font-weight: 600;
+      background: #fff7ed;
+    }
+    
+    .expenses-list {
+      width: 100%;
+      max-width: 400px;
+    }
+    
     .expense-item {
       display: flex;
       justify-content: space-between;
       padding: 0.75rem 0;
       border-bottom: 1px solid #fed7aa;
     }
+    
     .expense-item:last-child {
       border-bottom: none;
     }
+    
     .expense-date {
       font-size: 0.85rem;
       color: #666;
+      min-width: 40px;
     }
+    
     .expense-restaurant {
       font-weight: 500;
       color: #333;
+      flex: 1;
+      margin: 0 1rem;
     }
+    
     .expense-amount {
       font-weight: 700;
       color: #9a3412;
+      min-width: 60px;
+      text-align: right;
     }
+    
     .empty-state {
       text-align: center;
       color: #9a3412;
@@ -131,28 +231,12 @@ import { SupabaseService } from '../../services/supabase.service';
       padding: 2rem 0;
       font-size: 0.95rem;
     }
-    .orders-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .filter-icon {
-      font-size: 1.2rem;
-      margin-left: 0.5rem;
-      cursor: pointer;
-    }
-    .sort-select {
-      margin-left: 0.5rem;
-      padding: 0.2rem 0.5rem;
-      border: 1px solid #fed7aa;
-      border-radius: 0.5rem;
-      background: white;
-      font-size: 0.9rem;
-    }
+    
     @media (max-width: 768px) {
       .total-spent,
       .search-container,
-      .expenses-list {
+      .expenses-list,
+      .orders-header {
         max-width: 90%;
       }
     }
@@ -160,7 +244,6 @@ import { SupabaseService } from '../../services/supabase.service';
 })
 export class StatsComponent implements OnInit {
   private supabase = inject(SupabaseService);
-  loading = true;
   filteredExpenses: any[] = [];
   totalSpent = 0;
   allExpenses: any[] = [];
@@ -180,8 +263,6 @@ export class StatsComponent implements OnInit {
       this.sortExpenses();
     } catch (err) {
       console.error('Errore caricamento spese:', err);
-    } finally {
-      this.loading = false;
     }
   }
 
@@ -190,28 +271,28 @@ export class StatsComponent implements OnInit {
   }
 
   sortExpenses() {
-    this.filteredExpenses = this.allExpenses.slice().sort((a, b) => {
+    this.filteredExpenses = this.filteredExpenses.slice().sort((a, b) => {
       const dateA = new Date(a.created_at);
       const dateB = new Date(b.created_at);
-      if (this.sortOption === 'newest') {
-        return dateB.getTime() - dateA.getTime();
-      } else {
-        return dateA.getTime() - dateB.getTime();
-      }
+      return this.sortOption === 'newest' 
+        ? dateB.getTime() - dateA.getTime()
+        : dateA.getTime() - dateB.getTime();
     });
     this.calculateTotalSpent();
   }
 
-  handleSortChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    // Cast the value to the correct type
-    this.sortOption = select.value as 'newest' | 'oldest';
+  setSortOption(option: 'newest' | 'oldest') {
+    this.sortOption = option;
+    this.sortExpenses();
+    this.dropdownOpen = false;
   }
 
   onSearch(event: Event) {
     const input = event.target as HTMLInputElement;
     const query = input.value.toLowerCase();
-    this.filteredExpenses = this.allExpenses.filter(exp => exp.description.toLowerCase().includes(query));
+    this.filteredExpenses = this.allExpenses.filter(exp => 
+      exp.description.toLowerCase().includes(query)
+    );
     this.sortExpenses();
   }
 }
