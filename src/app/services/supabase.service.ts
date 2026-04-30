@@ -20,8 +20,22 @@ export class SupabaseService {
   }
 
   private async initializeSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    this._user.next(session?.user ?? null);
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Session initialization error:', error);
+        // Handle invalid/expired JWT (Supabase error code 5100)
+        if (error.code === '5100') {
+          await supabase.auth.signOut();
+        }
+        this._user.next(null);
+      } else {
+        this._user.next(data.session?.user ?? null);
+      }
+    } catch (err) {
+      console.error('Failed to initialize session:', err);
+      this._user.next(null);
+    }
   }
 
   getUser(): User | null {
