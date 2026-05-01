@@ -1,13 +1,18 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["node"],
     "outDir": "./out-tsc/app",
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "types": []
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "files": [
+    "src/main.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/environments/environment.prod.ts",
+    "src/app/hello/hello.component.ts"
+  ]
 }
