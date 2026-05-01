@@ -16,8 +16,7 @@ import { SupabaseService } from '../../services/supabase.service';
       </div>
       
       <div class="search-container">
-        <input
-          type="text"
+        <input          type="text"
           placeholder="Cerca ristorante..."
           (input)="onSearch($event)"
           class="search-input"
@@ -52,6 +51,20 @@ import { SupabaseService } from '../../services/supabase.service';
             >
               Più vecchi
             </div>
+            <div 
+              class="dropdown-item" 
+              [class.active]="sortOption === 'current_month'"
+              (click)="setSortOption('current_month')"
+            >
+              Mese corrente
+            </div>
+            <div 
+              class="dropdown-item" 
+              [class.active]="sortOption === 'previous_month'"
+              (click)="setSortOption('previous_month')"
+            >
+              Mese scorso
+            </div>
           </div>
         </div>
       </div>
@@ -85,8 +98,7 @@ import { SupabaseService } from '../../services/supabase.service';
       color: #9a3412;
       margin-bottom: 1.5rem;
     }
-    
-    .total-spent {
+        .total-spent {
       background: white;
       padding: 1rem 2rem;
       border-radius: 1rem;
@@ -96,8 +108,7 @@ import { SupabaseService } from '../../services/supabase.service';
       max-width: 400px;
       text-align: center;
     }
-    
-    .total-spent strong {
+        .total-spent strong {
       color: #f97316;
     }
     
@@ -169,8 +180,7 @@ import { SupabaseService } from '../../services/supabase.service';
       overflow: hidden;
       border: 1px solid #fed7aa;
     }
-    
-    .dropdown-item {
+        .dropdown-item {
       padding: 0.75rem 1rem;
       font-size: 0.9rem;
       color: #333;
@@ -247,7 +257,7 @@ export class StatsComponent implements OnInit {
   filteredExpenses: any[] = [];
   totalSpent = 0;
   allExpenses: any[] = [];
-  sortOption: 'newest' | 'oldest' = 'newest';
+  sortOption: 'newest' | 'oldest' | 'current_month' | 'previous_month' = 'newest';
   dropdownOpen = false;
 
   ngOnInit() {
@@ -259,7 +269,6 @@ export class StatsComponent implements OnInit {
       const { data, error } = await this.supabase.getExpenses();
       if (error) throw error;
       this.allExpenses = data || [];
-      this.filteredExpenses = [...this.allExpenses];
       this.sortExpenses();
     } catch (err) {
       console.error('Errore caricamento spese:', err);
@@ -271,20 +280,57 @@ export class StatsComponent implements OnInit {
   }
 
   sortExpenses() {
-    this.filteredExpenses = this.filteredExpenses.slice().sort((a, b) => {
+    // Clone expenses to avoid mutating original array
+    let expensesToSort = [...this.allExpenses];
+        // Apply month-based filtering if needed
+    if (this.sortOption === 'current_month' || this.sortOption === 'previous_month') {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      
+      // Determine target month/year
+      let targetMonth, targetYear;
+      if (this.sortOption === 'current_month') {
+        targetMonth = currentMonth;
+        targetYear = currentYear;
+      } else { // previous_month
+        targetMonth = currentMonth === 0 ? 11 : currentMonth - 1; // Handle January -> December
+        targetYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      }
+      
+      // Filter expenses to only those in the target month/year
+      expensesToSort = expensesToSort.filter(exp => {
+        const expDate = new Date(exp.created_at);
+        return expDate.getMonth() === targetMonth && expDate.getFullYear() === targetYear;
+      });
+    }
+    
+    // Apply sorting
+    expensesToSort.sort((a, b) => {
       const dateA = new Date(a.created_at);
       const dateB = new Date(b.created_at);
-      return this.sortOption === 'newest' 
-        ? dateB.getTime() - dateA.getTime()
-        : dateA.getTime() - dateB.getTime();
+      
+      switch (this.sortOption) {
+        case 'newest':
+          return dateB.getTime() - dateA.getTime();
+        case 'oldest':
+          return dateA.getTime() - dateB.getTime();
+        case 'current_month':
+        case 'previous_month':
+          // For month filters, sort newest first          return dateB.getTime() - dateA.getTime();
+        default:
+          return 0;
+      }
     });
+    
+    this.filteredExpenses = expensesToSort;
     this.calculateTotalSpent();
   }
 
-  setSortOption(option: 'newest' | 'oldest') {
+  setSortOption(option: 'newest' | 'oldest' | 'current_month' | 'previous_month') {
     this.sortOption = option;
+    this.dropdownOpen = false; // Close dropdown
     this.sortExpenses();
-    this.dropdownOpen = false;
   }
 
   onSearch(event: Event) {
