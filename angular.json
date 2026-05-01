@@ -11,11 +11,8 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "customWebpackConfig": {
-              "path": "./webpack.config.js"
-            },
             "outputPath": "dist/dyad-angular-template",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -46,7 +43,7 @@
           "defaultConfiguration": "development"
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": { "buildTarget": "dyad-angular-template:build:production" },
             "development": { "buildTarget": "dyad-angular-template:build:development" }
