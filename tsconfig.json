@@ -18,10 +18,8 @@
     "emitDecoratorMetadata": true,
     "types": ["node"],
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "paths": { "@/*": ["src/*"] }
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "src/environments/environment.prod.ts", "src/app/hello/hello.component.ts"]
 }
