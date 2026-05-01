@@ -1,9 +1,8 @@
-const AngularComponentTagger = require('./angular-webpack-component-tagger');
 const webpack = require('webpack');
 
 module.exports = {
   plugins: [
-    new AngularComponentTagger(),
+    // Only keep the DefinePlugin for environment variables
     new webpack.DefinePlugin({
       'process.env.NEXT_PUBLIC_SUPABASE_URL': JSON.stringify(
         process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://xccigtseyhdmpwdlsijv.supabase.co'
